@@ -25,7 +25,7 @@ body {
     overflow-x: hidden;
 }
 
-/* Organic background shapes */
+Organic background shapes
 body::before,
 body::after {
     content: '';
@@ -62,7 +62,7 @@ body::after {
     75% { transform: translate(20px, 30px) rotate(3deg); }
 }
 
-/* Decorative leaf patterns */
+Decorative leaf patterns 
 .leaf-pattern {
     position: fixed;
     width: 100%;
@@ -118,7 +118,7 @@ header {
     align-items: center;
     justify-content: center;
 }
-/* FIX: prevent pixel logo from showing text */
+
 .pixel-lock,
 .pixel-lock * {
     font-size: 0;
@@ -126,7 +126,7 @@ header {
     color: transparent;
 }
 
-/* Ensure logo aligns properly */
+Ensure logo aligns properly 
 .logo {
     display: flex;
     align-items: center;
@@ -134,7 +134,7 @@ header {
     gap: 15px;
 }
 
-/* Pixel Lock Container */
+Pixel Lock Container 
 .pixel-lock {
     position: relative;
     width: 60px;
@@ -148,7 +148,7 @@ header {
     50% { transform: translateY(-8px) rotate(2deg); }
 }
 
-/* Lock Shackle made of pixels with rounded container */
+
 .pixel-shackle {
     position: absolute;
     top: 0;
@@ -165,7 +165,7 @@ header {
     padding: 2px;
 }
 
-/* Lock Body made of pixels with rounded container */
+
 .pixel-body {
     position: absolute;
     bottom: 0;
@@ -182,7 +182,7 @@ header {
     padding: 2px;
 }
 
-/* Individual pixel squares with rounded edges */
+
 .pixel {
     width: 5px;
     height: 5px;
@@ -191,7 +191,7 @@ header {
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
-/* Pastel color variations for pixels */
+
 .pixel:nth-child(10n+1) { 
     background: #c8dbbe; 
     animation-delay: 0s;
@@ -233,7 +233,7 @@ header {
     animation-delay: 0.9s;
 }
 
-/* Pixel rearranging animation */
+
 @keyframes pixel-shuffle {
     0%, 100% { 
         transform: translate(0, 0) scale(1);
@@ -253,7 +253,7 @@ header {
     }
 }
 
-/* Apply random shuffle distances using nth-child */
+
 .pixel:nth-child(3n+1) { --shuffle-x: 3px; --shuffle-y: -2px; }
 .pixel:nth-child(3n+2) { --shuffle-x: -2px; --shuffle-y: 3px; }
 .pixel:nth-child(3n) { --shuffle-x: 2px; --shuffle-y: 2px; }
@@ -261,7 +261,7 @@ header {
 .pixel:nth-child(5n+2) { --shuffle-x: 3px; --shuffle-y: 3px; }
 .pixel:nth-child(7n) { --shuffle-x: -2px; --shuffle-y: 2px; }
 
-/* Keyhole made of pixels with rounded edges */
+
 .pixel-keyhole {
     position: absolute;
     bottom: 10px;
@@ -283,7 +283,7 @@ header {
     border-radius: 2.5px;
 }
 
-/* Soft glow effect */
+
 .pixel-lock::after {
     content: '';
     position: absolute;
