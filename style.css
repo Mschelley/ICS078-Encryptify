@@ -118,6 +118,21 @@ header {
     align-items: center;
     justify-content: center;
 }
+/* FIX: prevent pixel logo from showing text */
+.pixel-lock,
+.pixel-lock * {
+    font-size: 0;
+    line-height: 0;
+    color: transparent;
+}
+
+/* Ensure logo aligns properly */
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
 
 /* Pixel Lock Container */
 .pixel-lock {
