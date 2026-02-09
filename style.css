@@ -581,7 +581,7 @@ input[type="password"]::placeholder {
     }
 }
 
-/* Subtle texture overlay */
+
 .texture-overlay {
     position: fixed;
     top: 0;
