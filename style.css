@@ -75,7 +75,7 @@ body::after {
 
 header {
     text-align: center;
-    margin-bottom: 70px;
+    margin-bottom: 80px;
     animation: fadeInDown 1s ease-out;
 }
 
@@ -90,203 +90,14 @@ header {
     }
 }
 
-.logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.logo-icon {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.pixel-lock,
-.pixel-lock * {
-    font-size: 0;
-    line-height: 0;
-    color: transparent;
-}
-
-Ensure logo aligns properly 
-.logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-}
-
-Pixel Lock Container 
-.pixel-lock {
-    position: relative;
-    width: 60px;
-    height: 70px;
-    animation: lock-float 3s ease-in-out infinite;
-    filter: drop-shadow(0 4px 12px rgba(156, 175, 136, 0.25));
-}
-
-@keyframes lock-float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-8px) rotate(2deg); }
-}
 
 
-.pixel-shackle {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 25px;
-    display: grid;
-    grid-template-columns: repeat(8, 5px);
-    grid-template-rows: repeat(5, 5px);
-    gap: 0;
-    border-radius: 20px 20px 0 0;
-    overflow: hidden;
-    padding: 2px;
-}
 
 
-.pixel-body {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 50px;
-    height: 35px;
-    display: grid;
-    grid-template-columns: repeat(10, 5px);
-    grid-template-rows: repeat(7, 5px);
-    gap: 0;
-    border-radius: 8px;
-    overflow: hidden;
-    padding: 2px;
-}
 
 
-.pixel {
-    width: 5px;
-    height: 5px;
-    border-radius: 2px;
-    animation: pixel-shuffle 4s ease-in-out infinite;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-}
 
 
-.pixel:nth-child(10n+1) { 
-    background: #c8dbbe; 
-    animation-delay: 0s;
-}
-.pixel:nth-child(10n+2) { 
-    background: #b8d4a8; 
-    animation-delay: 0.1s;
-}
-.pixel:nth-child(10n+3) { 
-    background: #f4d4b8; 
-    animation-delay: 0.2s;
-}
-.pixel:nth-child(10n+4) { 
-    background: #e8c9a8; 
-    animation-delay: 0.3s;
-}
-.pixel:nth-child(10n+5) { 
-    background: #d4c8a8; 
-    animation-delay: 0.4s;
-}
-.pixel:nth-child(10n+6) { 
-    background: #9caf88; 
-    animation-delay: 0.5s;
-}
-.pixel:nth-child(10n+7) { 
-    background: #c8a882; 
-    animation-delay: 0.6s;
-}
-.pixel:nth-child(10n+8) { 
-    background: #afc49c; 
-    animation-delay: 0.7s;
-}
-.pixel:nth-child(10n+9) { 
-    background: #d4c4a8; 
-    animation-delay: 0.8s;
-}
-.pixel:nth-child(10n+10) { 
-    background: #b8c8a8; 
-    animation-delay: 0.9s;
-}
-
-
-@keyframes pixel-shuffle {
-    0%, 100% { 
-        transform: translate(0, 0) scale(1);
-        opacity: 1;
-    }
-    25% { 
-        transform: translate(var(--shuffle-x, 0), var(--shuffle-y, 0)) scale(0.8);
-        opacity: 0.7;
-    }
-    50% { 
-        transform: translate(0, 0) scale(1.1);
-        opacity: 1;
-    }
-    75% { 
-        transform: translate(calc(var(--shuffle-x, 0) * -0.5), calc(var(--shuffle-y, 0) * -0.5)) scale(0.9);
-        opacity: 0.8;
-    }
-}
-
-
-.pixel:nth-child(3n+1) { --shuffle-x: 3px; --shuffle-y: -2px; }
-.pixel:nth-child(3n+2) { --shuffle-x: -2px; --shuffle-y: 3px; }
-.pixel:nth-child(3n) { --shuffle-x: 2px; --shuffle-y: 2px; }
-.pixel:nth-child(5n+1) { --shuffle-x: -3px; --shuffle-y: -3px; }
-.pixel:nth-child(5n+2) { --shuffle-x: 3px; --shuffle-y: 3px; }
-.pixel:nth-child(7n) { --shuffle-x: -2px; --shuffle-y: 2px; }
-
-
-.pixel-keyhole {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 15px;
-    height: 20px;
-    display: grid;
-    grid-template-columns: repeat(3, 5px);
-    grid-template-rows: repeat(4, 5px);
-    gap: 0;
-    border-radius: 6px;
-    overflow: hidden;
-}
-
-.pixel-keyhole .pixel {
-    background: #5a7355 !important;
-    animation-delay: 1s;
-    border-radius: 2.5px;
-}
-
-
-.pixel-lock::after {
-    content: '';
-    position: absolute;
-    inset: -15px;
-    background: radial-gradient(circle, rgba(156, 175, 136, 0.3), transparent 70%);
-    border-radius: 50%;
-    animation: glow-pulse 3s ease-in-out infinite;
-    z-index: -1;
-    filter: blur(10px);
-}
-
-@keyframes glow-pulse {
-    0%, 100% { opacity: 0.6; transform: scale(1); }
-    50% { opacity: 0.9; transform: scale(1.15); }
-}
 
 .logo-text {
     font-family: 'Playfair Display', serif;

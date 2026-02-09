@@ -1,9 +1,9 @@
-// State
+
 let encryptFileData = null;
 let decryptFileData = null;
 
-// DOM Elements
-const encryptUpload = document.getElementById('encryptUpload');
+
+const encryptUpload = document.getElementById ('encryptUpload');
 const encryptFileInput = document.getElementById('encryptFile');
 const encryptFileDisplay = document.getElementById('encryptFileDisplay');
 const encryptFileName = document.getElementById('encryptFileName');
@@ -23,7 +23,7 @@ const statusContainer = document.getElementById('statusContainer');
 const progressBar = document.getElementById('progressBar');
 const progressFill = document.getElementById('progressFill');
 
-// Encrypt Upload Handlers
+
 encryptUpload.addEventListener('click', () => encryptFileInput.click());
 
 encryptUpload.addEventListener('dragover', (e) => {
@@ -64,7 +64,7 @@ function handleEncryptFile(file) {
     showStatus('success', `✓ ${file.name} is ready to protect`);
 }
 
-// Decrypt Upload Handlers
+
 decryptUpload.addEventListener('click', () => decryptFileInput.click());
 
 decryptUpload.addEventListener('dragover', (e) => {
@@ -105,7 +105,7 @@ function handleDecryptFile(file) {
     showStatus('success', `✓ ${file.name} is ready to unlock`);
 }
 
-// Encrypt Button
+
 encryptBtn.addEventListener('click', async () => {
     const password = encryptPassword.value;
 
@@ -152,7 +152,7 @@ encryptBtn.addEventListener('click', async () => {
     }
 });
 
-// Decrypt Button
+
 decryptBtn.addEventListener('click', async () => {
     const password = decryptPassword.value;
 
@@ -199,7 +199,7 @@ decryptBtn.addEventListener('click', async () => {
     }
 });
 
-// Helper Functions
+
 function arrayBufferToBase64(buffer) {
     let binary = '';
     const bytes = new Uint8Array(buffer);
