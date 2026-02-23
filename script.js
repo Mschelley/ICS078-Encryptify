@@ -3,11 +3,10 @@ let encryptFileData = null;
 let decryptFileData = null;
 
 
-<<<<<<< HEAD
+ HEAD
 const encryptUpload = document.getElementById ('encryptUpload');
-=======
-const encryptUpload = document.getElementById('encryptUpload');
->>>>>>> ce599e3beb6eb7de3c1f0f21605a56674d426316
+
+ ce599e3beb6eb7de3c1f0f21605a56674d426316
 const encryptFileInput = document.getElementById('encryptFile');
 const encryptFileDisplay = document.getElementById('encryptFileDisplay');
 const encryptFileName = document.getElementById('encryptFileName');
