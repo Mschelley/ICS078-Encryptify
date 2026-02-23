@@ -8,29 +8,19 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    
 
     <div class="container">
 
         <header>
             <div class="logo">
-                <div class="Text">
-                    <div class="">
-
-                       
-
-                       
-
-                    </div>
-                </div>
                 <h1 class="logo-text">Encryptify</h1>
             </div>
             <p class="tagline">PDF Protection</p>
-             </header>
+        </header>
 
         <div class="main-container">
 
-           
+            <!-- Encrypt Card -->
             <div class="card">
                 <div class="card-header">
                     <span class="card-icon">🔒</span>
@@ -44,6 +34,15 @@
                     <input type="file" id="encryptFile" accept=".pdf">
                 </div>
 
+                <!-- File display shown after upload -->
+                <div class="file-display" id="encryptFileDisplay">
+                    <div class="file-icon">📄</div>
+                    <div class="file-info">
+                        <div class="file-name" id="encryptFileName"></div>
+                        <div class="file-size" id="encryptFileSize"></div>
+                    </div>
+                </div>
+
                 <div class="input-group">
                     <label for="encryptPassword">Protection Password</label>
                     <input type="password" id="encryptPassword" placeholder="Enter password..." autocomplete="off">
@@ -54,7 +53,7 @@
                 </button>
             </div>
 
-           
+            <!-- Decrypt Card -->
             <div class="card">
                 <div class="card-header">
                     <span class="card-icon">🔓</span>
@@ -66,6 +65,15 @@
                     <div class="upload-text">Drop encrypted PDF</div>
                     <div class="upload-hint">or click to browse</div>
                     <input type="file" id="decryptFile" accept=".pdf">
+                </div>
+
+                <!-- File display shown after upload -->
+                <div class="file-display" id="decryptFileDisplay">
+                    <div class="file-icon">🔐</div>
+                    <div class="file-info">
+                        <div class="file-name" id="decryptFileName"></div>
+                        <div class="file-size" id="decryptFileSize"></div>
+                    </div>
                 </div>
 
                 <div class="input-group">
@@ -80,14 +88,11 @@
 
         </div>
 
-       
+        <!-- Status + Progress -->
         <div class="status-container" id="statusContainer">
             <div class="status-text">Upload a PDF to begin your journey</div>
-            <div class="progress-bar">
-                <div class="progress-fill"></div>
-            </div>
-        </div>
-                </div>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
             </div>
         </div>
 

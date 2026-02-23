@@ -1,33 +1,28 @@
-
 let encryptFileData = null;
 let decryptFileData = null;
 
-
-<<<<<<< HEAD
-const encryptUpload = document.getElementById ('encryptUpload');
-=======
-const encryptUpload = document.getElementById('encryptUpload');
->>>>>>> ce599e3beb6eb7de3c1f0f21605a56674d426316
-const encryptFileInput = document.getElementById('encryptFile');
+// ── DOM references ──────────────────────────────────────────────────────────
+const encryptUpload      = document.getElementById('encryptUpload');
+const encryptFileInput   = document.getElementById('encryptFile');
 const encryptFileDisplay = document.getElementById('encryptFileDisplay');
-const encryptFileName = document.getElementById('encryptFileName');
-const encryptFileSize = document.getElementById('encryptFileSize');
-const encryptPassword = document.getElementById('encryptPassword');
-const encryptBtn = document.getElementById('encryptBtn');
+const encryptFileName    = document.getElementById('encryptFileName');
+const encryptFileSize    = document.getElementById('encryptFileSize');
+const encryptPassword    = document.getElementById('encryptPassword');
+const encryptBtn         = document.getElementById('encryptBtn');
 
-const decryptUpload = document.getElementById('decryptUpload');
-const decryptFileInput = document.getElementById('decryptFile');
+const decryptUpload      = document.getElementById('decryptUpload');
+const decryptFileInput   = document.getElementById('decryptFile');
 const decryptFileDisplay = document.getElementById('decryptFileDisplay');
-const decryptFileName = document.getElementById('decryptFileName');
-const decryptFileSize = document.getElementById('decryptFileSize');
-const decryptPassword = document.getElementById('decryptPassword');
-const decryptBtn = document.getElementById('decryptBtn');
+const decryptFileName    = document.getElementById('decryptFileName');
+const decryptFileSize    = document.getElementById('decryptFileSize');
+const decryptPassword    = document.getElementById('decryptPassword');
+const decryptBtn         = document.getElementById('decryptBtn');
 
-const statusContainer = document.getElementById('statusContainer');
-const progressBar = document.getElementById('progressBar');
-const progressFill = document.getElementById('progressFill');
+const statusContainer    = document.getElementById('statusContainer');
+const progressBar        = document.getElementById('progressBar');
+const progressFill       = document.getElementById('progressFill');
 
-
+// ── Encrypt upload listeners ─────────────────────────────────────────────────
 encryptUpload.addEventListener('click', () => encryptFileInput.click());
 
 encryptUpload.addEventListener('dragover', (e) => {
@@ -53,22 +48,7 @@ encryptFileInput.addEventListener('change', (e) => {
     }
 });
 
-function handleEncryptFile(file) {
-    if (file.type !== 'application/pdf') {
-        showStatus('error', '🚫 Please select a valid PDF file');
-        return;
-    }
-
-    encryptFileData = file;
-    encryptFileName.textContent = file.name;
-    encryptFileSize.textContent = formatFileSize(file.size);
-    encryptFileDisplay.classList.add('active');
-    encryptBtn.disabled = false;
-
-    showStatus('success', `✓ ${file.name} is ready to protect`);
-}
-
-
+// ── Decrypt upload listeners ─────────────────────────────────────────────────
 decryptUpload.addEventListener('click', () => decryptFileInput.click());
 
 decryptUpload.addEventListener('dragover', (e) => {
@@ -94,6 +74,22 @@ decryptFileInput.addEventListener('change', (e) => {
     }
 });
 
+// ── File handler functions ───────────────────────────────────────────────────
+function handleEncryptFile(file) {
+    if (file.type !== 'application/pdf') {
+        showStatus('error', '🚫 Please select a valid PDF file');
+        return;
+    }
+
+    encryptFileData = file;
+    encryptFileName.textContent = file.name;
+    encryptFileSize.textContent = formatFileSize(file.size);
+    encryptFileDisplay.classList.add('active');
+    encryptBtn.disabled = false;
+
+    showStatus('success', `✓ ${file.name} is ready to protect`);
+}
+
 function handleDecryptFile(file) {
     if (file.type !== 'application/pdf') {
         showStatus('error', '🚫 Please select a valid PDF file');
@@ -109,7 +105,7 @@ function handleDecryptFile(file) {
     showStatus('success', `✓ ${file.name} is ready to unlock`);
 }
 
-
+// ── Encrypt button ───────────────────────────────────────────────────────────
 encryptBtn.addEventListener('click', async () => {
     const password = encryptPassword.value;
 
@@ -156,7 +152,7 @@ encryptBtn.addEventListener('click', async () => {
     }
 });
 
-
+// ── Decrypt button ───────────────────────────────────────────────────────────
 decryptBtn.addEventListener('click', async () => {
     const password = decryptPassword.value;
 
@@ -203,12 +199,11 @@ decryptBtn.addEventListener('click', async () => {
     }
 });
 
-
+// ── Utility functions ────────────────────────────────────────────────────────
 function arrayBufferToBase64(buffer) {
     let binary = '';
     const bytes = new Uint8Array(buffer);
-    const len = bytes.byteLength;
-    for (let i = 0; i < len; i++) {
+    for (let i = 0; i < bytes.byteLength; i++) {
         binary += String.fromCharCode(bytes[i]);
     }
     return btoa(binary);
@@ -216,9 +211,8 @@ function arrayBufferToBase64(buffer) {
 
 function base64ToArrayBuffer(base64) {
     const binaryString = atob(base64);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
         bytes[i] = binaryString.charCodeAt(i);
     }
     return bytes.buffer;
@@ -244,11 +238,7 @@ function downloadFile(blob, filename) {
 }
 
 function showStatus(type, message, filename = null) {
-    const icons = {
-        'success': '✨',
-        'error': '🚫',
-        'processing': '⏳'
-    };
+    const icons = { success: '✨', error: '🚫', processing: '⏳' };
 
     statusContainer.className = 'status-container ' + type;
     statusContainer.innerHTML = `
@@ -264,6 +254,9 @@ function showStatus(type, message, filename = null) {
         downloadNote.textContent = `Downloaded as: ${filename}`;
         statusContainer.appendChild(downloadNote);
     }
+
+    // Re-append progress bar (innerHTML wipes it)
+    statusContainer.appendChild(progressBar);
 
     if (type !== 'processing') {
         progressBar.classList.remove('active');
