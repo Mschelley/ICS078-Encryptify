@@ -1,9 +1,18 @@
 let encryptFileData = null;
 let decryptFileData = null;
 
+<<<<<<< HEAD
 // ── DOM references ──────────────────────────────────────────────────────────
 const encryptUpload      = document.getElementById('encryptUpload');
 const encryptFileInput   = document.getElementById('encryptFile');
+=======
+
+ HEAD
+const encryptUpload = document.getElementById ('encryptUpload');
+
+ ce599e3beb6eb7de3c1f0f21605a56674d426316
+const encryptFileInput = document.getElementById('encryptFile');
+>>>>>>> 0a2483394435bf3c07bb6a28c1d5154aca099e25
 const encryptFileDisplay = document.getElementById('encryptFileDisplay');
 const encryptFileName    = document.getElementById('encryptFileName');
 const encryptFileSize    = document.getElementById('encryptFileSize');
