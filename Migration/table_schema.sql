@@ -20,3 +20,13 @@ CREATE TABLE encrypted_data(
     date_encrypted DATETIME DEFAULT CUURRENT_TIMESTAMP,
     FOREIGN KEY (encryption_key_id) REFERENCES encryption_keys(Key_iD)
 );
+
+-- Table: Descryption Records
+CREATE TABLE decryption_records (
+    decryption_id INT auto_increment PRIMARY KEY,
+    encryption_id INT not null,
+    descrypted_text TEXT not null,
+    user_id INT not null,
+    date_decrypted DATETIME DEFAULT CUURRENT_TIMESTAMP,
+    FOREIGN KEY (encryption_id) REFERENCES encrypted_data(encryption_id)
+);
