@@ -8,6 +8,7 @@ CREATE TABLE encrypt_and_decrypt_file (
     rating TINYINT NOT NULL,
     comment VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- The Foreign Key Commands:
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (log_id) REFERENCES user_activity_logs(id)
 ) ENGINE=InnoDB;
