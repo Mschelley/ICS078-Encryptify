@@ -1,18 +1,150 @@
+// ════════════════════════════════════════
+// LOGIN, REGISTER & NAV
+// ════════════════════════════════════════
+
+const DEMO_USER = { email: 'demo@encryptify.app', password: 'demo1234', name: 'Demo User' };
+
+// In-memory user store (simulates a database for this demo)
+const userStore = [{ ...DEMO_USER }];
+
+const loginScreen   = document.getElementById('loginScreen');
+const registerModal = document.getElementById('registerModal');
+const loginBtn      = document.getElementById('loginBtn');
+const loginError    = document.getElementById('loginError');
+
+// ── Open / close register modal ───────────────────────────────────────────
+document.getElementById('openRegisterBtn').addEventListener('click', e => {
+    e.preventDefault();
+    registerModal.classList.add('visible');
+    clearRegisterForm();
+});
+
+document.getElementById('closeRegisterBtn').addEventListener('click', () => {
+    registerModal.classList.remove('visible');
+});
+
+document.getElementById('backToLoginBtn').addEventListener('click', e => {
+    e.preventDefault();
+    registerModal.classList.remove('visible');
+});
+
+// Close modal when clicking the backdrop
+registerModal.addEventListener('click', e => {
+    if (e.target === registerModal) registerModal.classList.remove('visible');
+});
+
+// ── Register logic ────────────────────────────────────────────────────────
+document.getElementById('registerBtn').addEventListener('click', () => {
+    const firstName = document.getElementById('regFirstName').value.trim();
+    const lastName  = document.getElementById('regLastName').value.trim();
+    const email     = document.getElementById('regEmail').value.trim();
+    const password  = document.getElementById('regPassword').value;
+    const confirm   = document.getElementById('regConfirmPassword').value;
+    const agreed    = document.getElementById('agreeTerms').checked;
+    const errorEl   = document.getElementById('registerError');
+    const successEl = document.getElementById('registerSuccess');
+
+    errorEl.style.display   = 'none';
+    successEl.style.display = 'none';
+
+    // Validation
+    if (!firstName || !lastName)  return showRegisterError('Please enter your first and last name.');
+    if (!email || !email.includes('@')) return showRegisterError('Please enter a valid email address.');
+    if (password.length < 6)      return showRegisterError('Password must be at least 6 characters.');
+    if (password !== confirm)     return showRegisterError('Passwords do not match.');
+    if (!agreed)                  return showRegisterError('Please agree to the Terms of Service.');
+
+    // Check duplicate email
+    if (userStore.find(u => u.email === email)) return showRegisterError('An account with this email already exists.');
+
+    // Save new user
+    const newUser = { email, password, name: `${firstName} ${lastName}` };
+    userStore.push(newUser);
+
+    // Show success, then auto-login after 1.8s
+    successEl.textContent = `🎉 Account created! Welcome, ${firstName}! Signing you in...`;
+    successEl.style.display = 'block';
+
+    setTimeout(() => {
+        registerModal.classList.remove('visible');
+        loginWithUser(newUser);
+    }, 1800);
+});
+
+function showRegisterError(msg) {
+    const el = document.getElementById('registerError');
+    el.textContent     = msg;
+    el.style.display   = 'block';
+}
+
+function clearRegisterForm() {
+    ['regFirstName', 'regLastName', 'regEmail', 'regPassword', 'regConfirmPassword'].forEach(id => {
+        document.getElementById(id).value = '';
+    });
+    document.getElementById('agreeTerms').checked          = false;
+    document.getElementById('registerError').style.display  = 'none';
+    document.getElementById('registerSuccess').style.display = 'none';
+}
+
+// ── Login logic ───────────────────────────────────────────────────────────
+function attemptLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass  = document.getElementById('loginPassword').value;
+    const user  = userStore.find(u => u.email === email && u.password === pass);
+
+    if (user) {
+        loginError.style.display = 'none';
+        loginWithUser(user);
+    } else {
+        loginError.style.display = 'block';
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('loginPassword').focus();
+    }
+}
+
+function loginWithUser(user) {
+    const initials = user.name.split(' ').map(w => w[0]).join('').toUpperCase();
+    document.getElementById('avatarInitials').textContent = initials;
+    document.getElementById('dropdownName').textContent   = user.name;
+    document.getElementById('dropdownEmail').textContent  = user.email;
+    loginScreen.classList.add('hidden');
+}
+
+loginBtn.addEventListener('click', attemptLogin);
+document.getElementById('loginPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') attemptLogin();
+});
+document.getElementById('loginEmail').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('loginPassword').focus();
+});
+
+// ── Logout ────────────────────────────────────────────────────────────────
+document.getElementById('logoutBtn').addEventListener('click', e => {
+    e.preventDefault();
+    loginScreen.classList.remove('hidden');
+    document.getElementById('loginEmail').value    = '';
+    document.getElementById('loginPassword').value = '';
+});
+
+// ── Nav active links ──────────────────────────────────────────────────────
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+    });
+});
+
+// ════════════════════════════════════════
+// ORIGINAL SCRIPT
+// ════════════════════════════════════════
+
 let encryptFileData = null;
 let decryptFileData = null;
 
-<<<<<<< HEAD
 // ── DOM references ──────────────────────────────────────────────────────────
 const encryptUpload      = document.getElementById('encryptUpload');
 const encryptFileInput   = document.getElementById('encryptFile');
-=======
-
- HEAD
-const encryptUpload = document.getElementById ('encryptUpload');
-
- ce599e3beb6eb7de3c1f0f21605a56674d426316
-const encryptFileInput = document.getElementById('encryptFile');
->>>>>>> 0a2483394435bf3c07bb6a28c1d5154aca099e25
 const encryptFileDisplay = document.getElementById('encryptFileDisplay');
 const encryptFileName    = document.getElementById('encryptFileName');
 const encryptFileSize    = document.getElementById('encryptFileSize');
