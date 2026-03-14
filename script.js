@@ -1,4 +1,5 @@
 // ════════════════════════════════════════
+<<<<<<< HEAD
 // APP STATE
 // ════════════════════════════════════════
 const appState = {
@@ -52,6 +53,14 @@ document.getElementById('navBrandLink').addEventListener('click', e => {
 // LOGIN / REGISTER / NAV
 // ════════════════════════════════════════
 const DEMO_USER = { email: 'demo@encryptify.app', password: 'demo1234', name: 'Demo User' };
+=======
+// LOGIN, REGISTER & NAV
+// ════════════════════════════════════════
+
+const DEMO_USER = { email: 'demo@encryptify.app', password: 'demo1234', name: 'Demo User' };
+
+// In-memory user store (simulates a database for this demo)
+>>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
 const userStore = [{ ...DEMO_USER }];
 
 const loginScreen   = document.getElementById('loginScreen');
@@ -59,15 +68,38 @@ const registerModal = document.getElementById('registerModal');
 const loginBtn      = document.getElementById('loginBtn');
 const loginError    = document.getElementById('loginError');
 
+<<<<<<< HEAD
+=======
+// ── Open / close register modal ───────────────────────────────────────────
+>>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
 document.getElementById('openRegisterBtn').addEventListener('click', e => {
     e.preventDefault();
     registerModal.classList.add('visible');
     clearRegisterForm();
 });
+<<<<<<< HEAD
 document.getElementById('closeRegisterBtn').addEventListener('click', () => registerModal.classList.remove('visible'));
 document.getElementById('backToLoginBtn').addEventListener('click', e => { e.preventDefault(); registerModal.classList.remove('visible'); });
 registerModal.addEventListener('click', e => { if (e.target === registerModal) registerModal.classList.remove('visible'); });
 
+=======
+
+document.getElementById('closeRegisterBtn').addEventListener('click', () => {
+    registerModal.classList.remove('visible');
+});
+
+document.getElementById('backToLoginBtn').addEventListener('click', e => {
+    e.preventDefault();
+    registerModal.classList.remove('visible');
+});
+
+// Close modal when clicking the backdrop
+registerModal.addEventListener('click', e => {
+    if (e.target === registerModal) registerModal.classList.remove('visible');
+});
+
+// ── Register logic ────────────────────────────────────────────────────────
+>>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
 document.getElementById('registerBtn').addEventListener('click', () => {
     const firstName = document.getElementById('regFirstName').value.trim();
     const lastName  = document.getElementById('regLastName').value.trim();
@@ -77,6 +109,7 @@ document.getElementById('registerBtn').addEventListener('click', () => {
     const agreed    = document.getElementById('agreeTerms').checked;
     const errorEl   = document.getElementById('registerError');
     const successEl = document.getElementById('registerSuccess');
+<<<<<<< HEAD
     errorEl.style.display = 'none'; successEl.style.display = 'none';
     if (!firstName || !lastName)            return showRegisterError('Please enter your first and last name.');
     if (!email || !email.includes('@'))     return showRegisterError('Please enter a valid email address.');
@@ -89,10 +122,39 @@ document.getElementById('registerBtn').addEventListener('click', () => {
     successEl.textContent = `🎉 Account created! Welcome, ${firstName}! Signing you in...`;
     successEl.style.display = 'block';
     setTimeout(() => { registerModal.classList.remove('visible'); loginWithUser(newUser); }, 1800);
+=======
+
+    errorEl.style.display   = 'none';
+    successEl.style.display = 'none';
+
+    // Validation
+    if (!firstName || !lastName)  return showRegisterError('Please enter your first and last name.');
+    if (!email || !email.includes('@')) return showRegisterError('Please enter a valid email address.');
+    if (password.length < 6)      return showRegisterError('Password must be at least 6 characters.');
+    if (password !== confirm)     return showRegisterError('Passwords do not match.');
+    if (!agreed)                  return showRegisterError('Please agree to the Terms of Service.');
+
+    // Check duplicate email
+    if (userStore.find(u => u.email === email)) return showRegisterError('An account with this email already exists.');
+
+    // Save new user
+    const newUser = { email, password, name: `${firstName} ${lastName}` };
+    userStore.push(newUser);
+
+    // Show success, then auto-login after 1.8s
+    successEl.textContent = `🎉 Account created! Welcome, ${firstName}! Signing you in...`;
+    successEl.style.display = 'block';
+
+    setTimeout(() => {
+        registerModal.classList.remove('visible');
+        loginWithUser(newUser);
+    }, 1800);
+>>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
 });
 
 function showRegisterError(msg) {
     const el = document.getElementById('registerError');
+<<<<<<< HEAD
     el.textContent = msg; el.style.display = 'block';
 }
 function clearRegisterForm() {
@@ -102,10 +164,30 @@ function clearRegisterForm() {
     document.getElementById('registerSuccess').style.display = 'none';
 }
 
+=======
+    el.textContent     = msg;
+    el.style.display   = 'block';
+}
+
+function clearRegisterForm() {
+    ['regFirstName', 'regLastName', 'regEmail', 'regPassword', 'regConfirmPassword'].forEach(id => {
+        document.getElementById(id).value = '';
+    });
+    document.getElementById('agreeTerms').checked          = false;
+    document.getElementById('registerError').style.display  = 'none';
+    document.getElementById('registerSuccess').style.display = 'none';
+}
+
+// ── Login logic ───────────────────────────────────────────────────────────
+>>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
 function attemptLogin() {
     const email = document.getElementById('loginEmail').value.trim();
     const pass  = document.getElementById('loginPassword').value;
     const user  = userStore.find(u => u.email === email && u.password === pass);
+<<<<<<< HEAD
+=======
+
+>>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
     if (user) {
         loginError.style.display = 'none';
         loginWithUser(user);
@@ -117,11 +199,15 @@ function attemptLogin() {
 }
 
 function loginWithUser(user) {
+<<<<<<< HEAD
     appState.currentUser = user;
+=======
+>>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
     const initials = user.name.split(' ').map(w => w[0]).join('').toUpperCase();
     document.getElementById('avatarInitials').textContent = initials;
     document.getElementById('dropdownName').textContent   = user.name;
     document.getElementById('dropdownEmail').textContent  = user.email;
+<<<<<<< HEAD
     // Pre-fill settings name/email
     document.getElementById('settingName').value  = user.name;
     document.getElementById('settingEmail').value = user.email;
@@ -148,6 +234,44 @@ document.getElementById('logoutBtn').addEventListener('click', e => {
 let encryptFileData = null;
 let decryptFileData = null;
 
+=======
+    loginScreen.classList.add('hidden');
+}
+
+loginBtn.addEventListener('click', attemptLogin);
+document.getElementById('loginPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') attemptLogin();
+});
+document.getElementById('loginEmail').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('loginPassword').focus();
+});
+
+// ── Logout ────────────────────────────────────────────────────────────────
+document.getElementById('logoutBtn').addEventListener('click', e => {
+    e.preventDefault();
+    loginScreen.classList.remove('hidden');
+    document.getElementById('loginEmail').value    = '';
+    document.getElementById('loginPassword').value = '';
+});
+
+// ── Nav active links ──────────────────────────────────────────────────────
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+    });
+});
+
+// ════════════════════════════════════════
+// ORIGINAL SCRIPT
+// ════════════════════════════════════════
+
+let encryptFileData = null;
+let decryptFileData = null;
+
+// ── DOM references ──────────────────────────────────────────────────────────
+>>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
 const encryptUpload      = document.getElementById('encryptUpload');
 const encryptFileInput   = document.getElementById('encryptFile');
 const encryptFileDisplay = document.getElementById('encryptFileDisplay');

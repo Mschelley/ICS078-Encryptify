@@ -18,6 +18,7 @@
                 <span class="login-logo-icon">🔐</span>
                 <h1>Encryptify</h1>
                 <p>PDF Protection Suite</p>
+<<<<<<< HEAD
             </div>
             <div class="login-divider"><span></span><p>Sign in to continue</p><span></span></div>
             <div class="login-error" id="loginError">Invalid email or password. Please try again.</div>
@@ -93,9 +94,12 @@
                         <a href="#" class="logout" id="logoutBtn">→ &nbsp;Sign Out</a>
                     </div>
                 </div>
+=======
+>>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
             </div>
         </nav>
 
+<<<<<<< HEAD
         <!-- ══ DASHBOARD PAGE ══ -->
         <div id="page-dashboard" class="page-view active-page">
             <div class="container">
@@ -162,8 +166,224 @@
                         <div class="progress-fill" id="progressFill"></div>
                     </div>
                 </div>
+=======
+            <div class="login-divider">
+                <span></span>
+                <p>Sign in to continue</p>
+                <span></span>
+            </div>
+
+            <div class="login-error" id="loginError">Invalid email or password. Please try again.</div>
+
+            <div class="login-field">
+                <label>Email Address</label>
+                <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
+            </div>
+
+            <div class="login-field">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="enter password..." autocomplete="current-password">
+            </div>
+
+            <div class="login-options">
+                <label>
+                    <input type="checkbox" id="rememberMe"> Remember me
+                </label>
+                <a href="#">Forgot password?</a>
+            </div>
+
+            <button class="btn-login" id="loginBtn">Sign In</button>
+
+            <div class="login-footer">
+                Don't have an account? <a href="#" id="openRegisterBtn">Create one free</a>
             </div>
         </div>
+    </div>
+
+    <!-- ── REGISTER MODAL ── -->
+    <div id="registerModal">
+        <div class="register-card">
+            <button class="register-close" id="closeRegisterBtn">✕</button>
+
+            <div class="login-logo">
+                <span class="login-logo-icon">🌿</span>
+                <h1>Create Account</h1>
+                <p>Join Encryptify for free</p>
+            </div>
+
+            <div class="login-divider">
+                <span></span>
+                <p>Fill in your details</p>
+                <span></span>
+            </div>
+
+            <div class="register-error" id="registerError"></div>
+            <div class="register-success" id="registerSuccess"></div>
+
+            <div class="register-row">
+                <div class="login-field">
+                    <label>First Name</label>
+                    <input type="text" id="regFirstName" placeholder="Jane" autocomplete="given-name">
+                </div>
+                <div class="login-field">
+                    <label>Last Name</label>
+                    <input type="text" id="regLastName" placeholder="Doe" autocomplete="family-name">
+                </div>
+            </div>
+
+            <div class="login-field">
+                <label>Email Address</label>
+                <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email">
+            </div>
+
+            <div class="login-field">
+                <label>Password</label>
+                <input type="password" id="regPassword" placeholder="min. 6 characters" autocomplete="new-password">
+            </div>
+
+            <div class="login-field">
+                <label>Confirm Password</label>
+                <input type="password" id="regConfirmPassword" placeholder="repeat password" autocomplete="new-password">
+            </div>
+
+            <div class="register-terms">
+                <label>
+                    <input type="checkbox" id="agreeTerms">
+                    I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                </label>
+            </div>
+
+            <button class="btn-login" id="registerBtn">Create Free Account</button>
+
+            <div class="login-footer">
+                Already have an account? <a href="#" id="backToLoginBtn">Sign in</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── APP SCREEN ── -->
+    <div id="appScreen">
+
+        <!-- ── NAV BAR ── -->
+        <nav>
+            <a class="nav-brand" href="#">
+                <span class="nav-brand-icon">🔐</span>
+                <span class="nav-brand-name">Encryptify</span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="#" class="active">⊞ &nbsp;Dashboard</a></li>
+                <li><a href="#">📄 &nbsp;My Files</a></li>
+                <li><a href="#">📊 &nbsp;Activity</a></li>
+                <li><a href="#">⚙️ &nbsp;Settings</a></li>
+            </ul>
+
+            <div class="nav-right">
+                <span class="nav-badge">Pro</span>
+                <div class="nav-avatar" tabindex="0" id="navAvatar">
+                    <span id="avatarInitials">JD</span>
+                    <div class="avatar-dropdown">
+                        <div class="avatar-dropdown-header">
+                            <div class="avatar-dropdown-name" id="dropdownName">John Doe</div>
+                            <div class="avatar-dropdown-email" id="dropdownEmail">john@example.com</div>
+                        </div>
+                        <a href="#">👤 &nbsp;Profile</a>
+                        <a href="#">🔑 &nbsp;API Keys</a>
+                        <a href="#">💳 &nbsp;Billing</a>
+                        <a href="#" class="logout" id="logoutBtn">→ &nbsp;Sign Out</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ── ORIGINAL CONTENT ── -->
+        <div class="container">
+
+            <header>
+                <div class="logo">
+                    <h1 class="logo-text">Encryptify</h1>
+                </div>
+                <p class="tagline">PDF Protection</p>
+            </header>
+
+            <div class="main-container">
+
+                <!-- Encrypt Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">🔒</span>
+                        <h2 class="card-title">Encrypt</h2>
+                    </div>
+
+                    <div class="upload-area" id="encryptUpload">
+                        <div class="upload-icon">📄</div>
+                        <div class="upload-text">Drop your PDF here</div>
+                        <div class="upload-hint">or click to browse</div>
+                        <input type="file" id="encryptFile" accept=".pdf">
+                    </div>
+
+                    <div class="file-display" id="encryptFileDisplay">
+                        <div class="file-icon">📄</div>
+                        <div class="file-info">
+                            <div class="file-name" id="encryptFileName"></div>
+                            <div class="file-size" id="encryptFileSize"></div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="encryptPassword">Protection Password</label>
+                        <input type="password" id="encryptPassword" placeholder="Enter password..." autocomplete="off">
+                    </div>
+
+                    <button class="btn btn-encrypt" id="encryptBtn" disabled>
+                        Protect PDF
+                    </button>
+                </div>
+
+                <!-- Decrypt Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">🔓</span>
+                        <h2 class="card-title">Decrypt</h2>
+                    </div>
+
+                    <div class="upload-area" id="decryptUpload">
+                        <div class="upload-icon">🔐</div>
+                        <div class="upload-text">Drop encrypted PDF</div>
+                        <div class="upload-hint">or click to browse</div>
+                        <input type="file" id="decryptFile" accept=".pdf">
+                    </div>
+
+                    <div class="file-display" id="decryptFileDisplay">
+                        <div class="file-icon">🔐</div>
+                        <div class="file-info">
+                            <div class="file-name" id="decryptFileName"></div>
+                            <div class="file-size" id="decryptFileSize"></div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="decryptPassword">Enter Password</label>
+                        <input type="password" id="decryptPassword" placeholder="Enter password..." autocomplete="off">
+                    </div>
+
+                    <button class="btn btn-decrypt" id="decryptBtn" disabled>
+                        Unlock PDF
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Status + Progress -->
+            <div class="status-container" id="statusContainer">
+                <div class="status-text">Upload a PDF to begin your journey</div>
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+>>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
+            </div>
+        </div>
+<<<<<<< HEAD
 
         <!-- ══ MY FILES PAGE ══ -->
         <div id="page-files" class="page-view">
@@ -352,6 +572,8 @@
             </div>
         </div>
 
+=======
+>>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
