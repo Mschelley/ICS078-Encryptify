@@ -19,37 +19,22 @@
                 <h1>Encryptify</h1>
                 <p>PDF Protection Suite</p>
             </div>
-
-            <div class="login-divider">
-                <span></span>
-                <p>Sign in to continue</p>
-                <span></span>
-            </div>
-
+            <div class="login-divider"><span></span><p>Sign in to continue</p><span></span></div>
             <div class="login-error" id="loginError">Invalid email or password. Please try again.</div>
-
             <div class="login-field">
                 <label>Email Address</label>
                 <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
             </div>
-
             <div class="login-field">
                 <label>Password</label>
                 <input type="password" id="loginPassword" placeholder="enter password..." autocomplete="current-password">
             </div>
-
             <div class="login-options">
-                <label>
-                    <input type="checkbox" id="rememberMe"> Remember me
-                </label>
+                <label><input type="checkbox" id="rememberMe"> Remember me</label>
                 <a href="#">Forgot password?</a>
             </div>
-
             <button class="btn-login" id="loginBtn">Sign In</button>
-
-            <div class="login-footer">
-                Don't have an account? <a href="#" id="openRegisterBtn">Create one free</a>
-            </div>
+            <div class="login-footer">Don't have an account? <a href="#" id="openRegisterBtn">Create one free</a></div>
         </div>
     </div>
 
@@ -57,80 +42,44 @@
     <div id="registerModal">
         <div class="register-card">
             <button class="register-close" id="closeRegisterBtn">✕</button>
-
             <div class="login-logo">
                 <span class="login-logo-icon">🌿</span>
                 <h1>Create Account</h1>
                 <p>Join Encryptify for free</p>
             </div>
-
-            <div class="login-divider">
-                <span></span>
-                <p>Fill in your details</p>
-                <span></span>
-            </div>
-
+            <div class="login-divider"><span></span><p>Fill in your details</p><span></span></div>
             <div class="register-error" id="registerError"></div>
             <div class="register-success" id="registerSuccess"></div>
-
             <div class="register-row">
-                <div class="login-field">
-                    <label>First Name</label>
-                    <input type="text" id="regFirstName" placeholder="Jane" autocomplete="given-name">
-                </div>
-                <div class="login-field">
-                    <label>Last Name</label>
-                    <input type="text" id="regLastName" placeholder="Doe" autocomplete="family-name">
-                </div>
+                <div class="login-field"><label>First Name</label><input type="text" id="regFirstName" placeholder="Jane" autocomplete="given-name"></div>
+                <div class="login-field"><label>Last Name</label><input type="text" id="regLastName" placeholder="Doe" autocomplete="family-name"></div>
             </div>
-
-            <div class="login-field">
-                <label>Email Address</label>
-                <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email">
-            </div>
-
-            <div class="login-field">
-                <label>Password</label>
-                <input type="password" id="regPassword" placeholder="min. 6 characters" autocomplete="new-password">
-            </div>
-
-            <div class="login-field">
-                <label>Confirm Password</label>
-                <input type="password" id="regConfirmPassword" placeholder="repeat password" autocomplete="new-password">
-            </div>
-
+            <div class="login-field"><label>Email Address</label><input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email"></div>
+            <div class="login-field"><label>Password</label><input type="password" id="regPassword" placeholder="min. 6 characters" autocomplete="new-password"></div>
+            <div class="login-field"><label>Confirm Password</label><input type="password" id="regConfirmPassword" placeholder="repeat password" autocomplete="new-password"></div>
             <div class="register-terms">
-                <label>
-                    <input type="checkbox" id="agreeTerms">
-                    I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
-                </label>
+                <label><input type="checkbox" id="agreeTerms"> I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
             </div>
-
             <button class="btn-login" id="registerBtn">Create Free Account</button>
-
-            <div class="login-footer">
-                Already have an account? <a href="#" id="backToLoginBtn">Sign in</a>
-            </div>
+            <div class="login-footer">Already have an account? <a href="#" id="backToLoginBtn">Sign in</a></div>
         </div>
     </div>
 
     <!-- ── APP SCREEN ── -->
     <div id="appScreen">
 
-        <!-- ── NAV BAR ── -->
+        <!-- NAV BAR -->
         <nav>
-            <a class="nav-brand" href="#">
+            <a class="nav-brand" href="#" id="navBrandLink">
                 <span class="nav-brand-icon">🔐</span>
                 <span class="nav-brand-name">Encryptify</span>
             </a>
-
             <ul class="nav-links">
-                <li><a href="#" class="active">⊞ &nbsp;Dashboard</a></li>
-                <li><a href="#">📄 &nbsp;My Files</a></li>
-                <li><a href="#">📊 &nbsp;Activity</a></li>
-                <li><a href="#">⚙️ &nbsp;Settings</a></li>
+                <li><a href="#" class="active" data-page="dashboard">⊞ &nbsp;Dashboard</a></li>
+                <li><a href="#" data-page="files">📄 &nbsp;My Files</a></li>
+                <li><a href="#" data-page="activity">📊 &nbsp;Activity</a></li>
+                <li><a href="#" data-page="settings">⚙️ &nbsp;Settings</a></li>
             </ul>
-
             <div class="nav-right">
                 <span class="nav-badge">Pro</span>
                 <div class="nav-avatar" tabindex="0" id="navAvatar">
@@ -140,101 +89,269 @@
                             <div class="avatar-dropdown-name" id="dropdownName">Rechelle Jane</div>
                             <div class="avatar-dropdown-email" id="dropdownEmail">jane@example.com</div>
                         </div>
-                        <a href="#">👤 &nbsp;Profile</a>
-                        <a href="#">💳 &nbsp;Billing</a>
+                       
                         <a href="#" class="logout" id="logoutBtn">→ &nbsp;Sign Out</a>
                     </div>
                 </div>
             </div>
         </nav>
 
-        <!-- ── ORIGINAL CONTENT ── -->
-        <div class="container">
-
-            <header>
-                <div class="logo">
+        <!-- ══ DASHBOARD PAGE ══ -->
+        <div id="page-dashboard" class="page-view active-page">
+            <div class="container">
+                <header>
                     <h1 class="logo-text">Encryptify</h1>
-                </div>
-                <p class="tagline">PDF Protection</p>
-            </header>
-
-            <div class="main-container">
-
-                <!-- Encrypt Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-icon">🔒</span>
-                        <h2 class="card-title">Encrypt</h2>
-                    </div>
-
-                    <div class="upload-area" id="encryptUpload">
-                        <div class="upload-icon">📄</div>
-                        <div class="upload-text">Drop your PDF here</div>
-                        <div class="upload-hint">or click to browse</div>
-                        <input type="file" id="encryptFile" accept=".pdf">
-                    </div>
-
-                    <div class="file-display" id="encryptFileDisplay">
-                        <div class="file-icon">📄</div>
-                        <div class="file-info">
-                            <div class="file-name" id="encryptFileName"></div>
-                            <div class="file-size" id="encryptFileSize"></div>
+                    <p class="tagline">PDF Protection</p>
+                </header>
+                <div class="main-container">
+                    <!-- Encrypt Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">🔒</span>
+                            <h2 class="card-title">Encrypt</h2>
                         </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="encryptPassword">Protection Password</label>
-                        <input type="password" id="encryptPassword" placeholder="Enter password..." autocomplete="off">
-                    </div>
-
-                    <button class="btn btn-encrypt" id="encryptBtn" disabled>
-                        Protect PDF
-                    </button>
-                </div>
-
-                <!-- Decrypt Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-icon">🔓</span>
-                        <h2 class="card-title">Decrypt</h2>
-                    </div>
-
-                    <div class="upload-area" id="decryptUpload">
-                        <div class="upload-icon">🔐</div>
-                        <div class="upload-text">Drop encrypted PDF</div>
-                        <div class="upload-hint">or click to browse</div>
-                        <input type="file" id="decryptFile" accept=".pdf">
-                    </div>
-
-                    <div class="file-display" id="decryptFileDisplay">
-                        <div class="file-icon">🔐</div>
-                        <div class="file-info">
-                            <div class="file-name" id="decryptFileName"></div>
-                            <div class="file-size" id="decryptFileSize"></div>
+                        <div class="upload-area" id="encryptUpload">
+                            <div class="upload-icon">📄</div>
+                            <div class="upload-text">Drop your PDF here</div>
+                            <div class="upload-hint">or click to browse</div>
+                            <input type="file" id="encryptFile" accept=".pdf">
                         </div>
+                        <div class="file-display" id="encryptFileDisplay">
+                            <div class="file-icon">📄</div>
+                            <div class="file-info">
+                                <div class="file-name" id="encryptFileName"></div>
+                                <div class="file-size" id="encryptFileSize"></div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="encryptPassword">Protection Password</label>
+                            <input type="password" id="encryptPassword" placeholder="Enter password..." autocomplete="off">
+                            <div class="password-strength" id="encryptStrength"></div>
+                        </div>
+                        <button class="btn btn-encrypt" id="encryptBtn" disabled>Protect PDF</button>
                     </div>
-
-                    <div class="input-group">
-                        <label for="decryptPassword">Enter Password</label>
-                        <input type="password" id="decryptPassword" placeholder="Enter password..." autocomplete="off">
+                    <!-- Decrypt Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">🔓</span>
+                            <h2 class="card-title">Decrypt</h2>
+                        </div>
+                        <div class="upload-area" id="decryptUpload">
+                            <div class="upload-icon">🔐</div>
+                            <div class="upload-text">Drop encrypted PDF</div>
+                            <div class="upload-hint">or click to browse</div>
+                            <input type="file" id="decryptFile" accept=".pdf">
+                        </div>
+                        <div class="file-display" id="decryptFileDisplay">
+                            <div class="file-icon">🔐</div>
+                            <div class="file-info">
+                                <div class="file-name" id="decryptFileName"></div>
+                                <div class="file-size" id="decryptFileSize"></div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="decryptPassword">Enter Password</label>
+                            <input type="password" id="decryptPassword" placeholder="Enter password..." autocomplete="off">
+                        </div>
+                        <button class="btn btn-decrypt" id="decryptBtn" disabled>Unlock PDF</button>
                     </div>
-
-                    <button class="btn btn-decrypt" id="decryptBtn" disabled>
-                        Unlock PDF
-                    </button>
                 </div>
-
-            </div>
-
-            <!-- Status + Progress -->
-            <div class="status-container" id="statusContainer">
-                <div class="status-text">Upload a PDF to begin your journey</div>
-                <div class="progress-bar" id="progressBar">
-                    <div class="progress-fill" id="progressFill"></div>
+                <div class="status-container" id="statusContainer">
+                    <div class="status-text">Upload a PDF to begin your journey</div>
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
                 </div>
             </div>
-
         </div>
+
+        <!-- ══ MY FILES PAGE ══ -->
+        <div id="page-files" class="page-view">
+            <div class="container">
+                <header>
+                    <h1 class="logo-text">My Files</h1>
+                    <p class="tagline">Your Protected Documents</p>
+                </header>
+                <div class="files-toolbar">
+                    <div class="files-search-wrap">
+                        <span class="files-search-icon">🔍</span>
+                        <input type="text" id="filesSearch" class="files-search" placeholder="Search files...">
+                    </div>
+                    <div class="files-filter-btns">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="encrypted">🔒 Encrypted</button>
+                        <button class="filter-btn" data-filter="decrypted">🔓 Decrypted</button>
+                    </div>
+                </div>
+                <div class="files-grid" id="filesGrid"></div>
+                <div class="files-empty" id="filesEmpty">
+                    <div class="files-empty-icon">📂</div>
+                    <div class="files-empty-title">No files yet</div>
+                    <div class="files-empty-sub">Files you encrypt or decrypt will appear here.</div>
+                    <button class="btn-go-dash" onclick="switchPage('dashboard')">Go to Dashboard</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ ACTIVITY PAGE ══ -->
+        <div id="page-activity" class="page-view">
+            <div class="container">
+                <header>
+                    <h1 class="logo-text">Activity</h1>
+                    <p class="tagline">Your Recent Actions</p>
+                </header>
+                <div class="activity-stats-row">
+                    <div class="stat-card">
+                        <div class="stat-icon">🔒</div>
+                        <div class="stat-value" id="statEncrypted">0</div>
+                        <div class="stat-label">Files Encrypted</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔓</div>
+                        <div class="stat-value" id="statDecrypted">0</div>
+                        <div class="stat-label">Files Decrypted</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📁</div>
+                        <div class="stat-value" id="statTotal">0</div>
+                        <div class="stat-label">Total Files</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-value" id="statToday">0</div>
+                        <div class="stat-label">Today</div>
+                    </div>
+                </div>
+                <div class="activity-card">
+                    <div class="activity-card-header">
+                        <span class="activity-card-title">📋 &nbsp;Recent Actions</span>
+                        <button class="btn-clear-log" id="clearLogBtn">Clear Log</button>
+                    </div>
+                    <div class="activity-log" id="activityLog">
+                        <div class="activity-empty">No activity yet. Start encrypting or decrypting files!</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ SETTINGS PAGE ══ -->
+        <div id="page-settings" class="page-view">
+            <div class="container">
+                <header>
+                    <h1 class="logo-text">Settings</h1>
+                    <p class="tagline">Preferences & Account</p>
+                </header>
+                <div class="settings-grid">
+
+                    <div class="settings-section">
+                        <div class="settings-section-title">👤 Account</div>
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <div class="settings-label-main">Display Name</div>
+                                <div class="settings-label-sub">Shown in the navigation bar</div>
+                            </div>
+                            <input type="text" class="settings-input" id="settingName" placeholder="Your name">
+                        </div>
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <div class="settings-label-main">Email Address</div>
+                                <div class="settings-label-sub">Used for login</div>
+                            </div>
+                            <input type="email" class="settings-input" id="settingEmail" placeholder="you@example.com">
+                        </div>
+                        <div class="settings-row settings-row-end">
+                            <div></div>
+                            <button class="btn-settings-save" id="saveAccountBtn">Save Changes</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="settings-section-title">🔐 Security</div>
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <div class="settings-label-main">Minimum Password Length</div>
+                                <div class="settings-label-sub">For encrypting PDFs</div>
+                            </div>
+                            <select class="settings-select" id="settingMinPass">
+                                <option value="6">6 characters</option>
+                                <option value="8">8 characters</option>
+                                <option value="12">12 characters</option>
+                                <option value="16">16 characters</option>
+                            </select>
+                        </div>
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <div class="settings-label-main">Auto-clear Password Fields</div>
+                                <div class="settings-label-sub">Clear after each operation</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="settingAutoClear" checked>
+                                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                            </label>
+                        </div>
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <div class="settings-label-main">Show Password Strength</div>
+                                <div class="settings-label-sub">Display strength indicator while typing</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="settingPassStrength" checked>
+                                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="settings-section-title">🎨 Appearance</div>
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <div class="settings-label-main">Theme</div>
+                                <div class="settings-label-sub">Interface color scheme</div>
+                            </div>
+                            <select class="settings-select" id="settingTheme">
+                                <option value="natural">🌿 Natural (Default)</option>
+                                <option value="ocean">🌊 Ocean</option>
+                                <option value="dusk">🌅 Dusk</option>
+                            </select>
+                        </div>
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <div class="settings-label-main">Reduce Animations</div>
+                                <div class="settings-label-sub">For better performance</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="settingReduceMotion">
+                                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="settings-section-title">🗂️ Storage & Privacy</div>
+                        <div class="settings-row">
+                            <div class="settings-label">
+                                <div class="settings-label-main">Save File History</div>
+                                <div class="settings-label-sub">Keep a log of encrypted/decrypted files</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="settingHistory" checked>
+                                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                            </label>
+                        </div>
+                        <div class="settings-row settings-row-end">
+                            <div class="settings-label">
+                                <div class="settings-label-main">Clear All Data</div>
+                                <div class="settings-label-sub">Remove all file history and activity logs</div>
+                            </div>
+                            <button class="btn-settings-danger" id="clearAllDataBtn">Clear Data</button>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="settings-toast" id="settingsToast"></div>
+            </div>
+        </div>
+
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
