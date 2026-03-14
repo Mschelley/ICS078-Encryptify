@@ -1,5 +1,4 @@
 // ════════════════════════════════════════
-<<<<<<< HEAD
 // APP STATE
 // ════════════════════════════════════════
 const appState = {
@@ -53,14 +52,8 @@ document.getElementById('navBrandLink').addEventListener('click', e => {
 // LOGIN / REGISTER / NAV
 // ════════════════════════════════════════
 const DEMO_USER = { email: 'demo@encryptify.app', password: 'demo1234', name: 'Demo User' };
-=======
-// LOGIN, REGISTER & NAV
-// ════════════════════════════════════════
-
-const DEMO_USER = { email: 'demo@encryptify.app', password: 'demo1234', name: 'Demo User' };
 
 // In-memory user store (simulates a database for this demo)
->>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
 const userStore = [{ ...DEMO_USER }];
 
 const loginScreen   = document.getElementById('loginScreen');
@@ -68,21 +61,12 @@ const registerModal = document.getElementById('registerModal');
 const loginBtn      = document.getElementById('loginBtn');
 const loginError    = document.getElementById('loginError');
 
-<<<<<<< HEAD
-=======
 // ── Open / close register modal ───────────────────────────────────────────
->>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
 document.getElementById('openRegisterBtn').addEventListener('click', e => {
     e.preventDefault();
     registerModal.classList.add('visible');
     clearRegisterForm();
 });
-<<<<<<< HEAD
-document.getElementById('closeRegisterBtn').addEventListener('click', () => registerModal.classList.remove('visible'));
-document.getElementById('backToLoginBtn').addEventListener('click', e => { e.preventDefault(); registerModal.classList.remove('visible'); });
-registerModal.addEventListener('click', e => { if (e.target === registerModal) registerModal.classList.remove('visible'); });
-
-=======
 
 document.getElementById('closeRegisterBtn').addEventListener('click', () => {
     registerModal.classList.remove('visible');
@@ -99,7 +83,6 @@ registerModal.addEventListener('click', e => {
 });
 
 // ── Register logic ────────────────────────────────────────────────────────
->>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
 document.getElementById('registerBtn').addEventListener('click', () => {
     const firstName = document.getElementById('regFirstName').value.trim();
     const lastName  = document.getElementById('regLastName').value.trim();
@@ -109,30 +92,16 @@ document.getElementById('registerBtn').addEventListener('click', () => {
     const agreed    = document.getElementById('agreeTerms').checked;
     const errorEl   = document.getElementById('registerError');
     const successEl = document.getElementById('registerSuccess');
-<<<<<<< HEAD
-    errorEl.style.display = 'none'; successEl.style.display = 'none';
-    if (!firstName || !lastName)            return showRegisterError('Please enter your first and last name.');
-    if (!email || !email.includes('@'))     return showRegisterError('Please enter a valid email address.');
-    if (password.length < 6)               return showRegisterError('Password must be at least 6 characters.');
-    if (password !== confirm)              return showRegisterError('Passwords do not match.');
-    if (!agreed)                           return showRegisterError('Please agree to the Terms of Service.');
-    if (userStore.find(u => u.email === email)) return showRegisterError('An account with this email already exists.');
-    const newUser = { email, password, name: `${firstName} ${lastName}` };
-    userStore.push(newUser);
-    successEl.textContent = `🎉 Account created! Welcome, ${firstName}! Signing you in...`;
-    successEl.style.display = 'block';
-    setTimeout(() => { registerModal.classList.remove('visible'); loginWithUser(newUser); }, 1800);
-=======
 
     errorEl.style.display   = 'none';
     successEl.style.display = 'none';
 
     // Validation
-    if (!firstName || !lastName)  return showRegisterError('Please enter your first and last name.');
+    if (!firstName || !lastName)        return showRegisterError('Please enter your first and last name.');
     if (!email || !email.includes('@')) return showRegisterError('Please enter a valid email address.');
-    if (password.length < 6)      return showRegisterError('Password must be at least 6 characters.');
-    if (password !== confirm)     return showRegisterError('Passwords do not match.');
-    if (!agreed)                  return showRegisterError('Please agree to the Terms of Service.');
+    if (password.length < 6)           return showRegisterError('Password must be at least 6 characters.');
+    if (password !== confirm)          return showRegisterError('Passwords do not match.');
+    if (!agreed)                        return showRegisterError('Please agree to the Terms of Service.');
 
     // Check duplicate email
     if (userStore.find(u => u.email === email)) return showRegisterError('An account with this email already exists.');
@@ -142,52 +111,36 @@ document.getElementById('registerBtn').addEventListener('click', () => {
     userStore.push(newUser);
 
     // Show success, then auto-login after 1.8s
-    successEl.textContent = `🎉 Account created! Welcome, ${firstName}! Signing you in...`;
+    successEl.textContent   = `🎉 Account created! Welcome, ${firstName}! Signing you in...`;
     successEl.style.display = 'block';
 
     setTimeout(() => {
         registerModal.classList.remove('visible');
         loginWithUser(newUser);
     }, 1800);
->>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
 });
 
 function showRegisterError(msg) {
     const el = document.getElementById('registerError');
-<<<<<<< HEAD
-    el.textContent = msg; el.style.display = 'block';
-}
-function clearRegisterForm() {
-    ['regFirstName','regLastName','regEmail','regPassword','regConfirmPassword'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('agreeTerms').checked = false;
-    document.getElementById('registerError').style.display = 'none';
-    document.getElementById('registerSuccess').style.display = 'none';
-}
-
-=======
-    el.textContent     = msg;
-    el.style.display   = 'block';
+    el.textContent   = msg;
+    el.style.display = 'block';
 }
 
 function clearRegisterForm() {
     ['regFirstName', 'regLastName', 'regEmail', 'regPassword', 'regConfirmPassword'].forEach(id => {
         document.getElementById(id).value = '';
     });
-    document.getElementById('agreeTerms').checked          = false;
+    document.getElementById('agreeTerms').checked           = false;
     document.getElementById('registerError').style.display  = 'none';
     document.getElementById('registerSuccess').style.display = 'none';
 }
 
 // ── Login logic ───────────────────────────────────────────────────────────
->>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
 function attemptLogin() {
     const email = document.getElementById('loginEmail').value.trim();
     const pass  = document.getElementById('loginPassword').value;
     const user  = userStore.find(u => u.email === email && u.password === pass);
-<<<<<<< HEAD
-=======
 
->>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
     if (user) {
         loginError.style.display = 'none';
         loginWithUser(user);
@@ -199,43 +152,18 @@ function attemptLogin() {
 }
 
 function loginWithUser(user) {
-<<<<<<< HEAD
     appState.currentUser = user;
-=======
->>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
     const initials = user.name.split(' ').map(w => w[0]).join('').toUpperCase();
     document.getElementById('avatarInitials').textContent = initials;
     document.getElementById('dropdownName').textContent   = user.name;
     document.getElementById('dropdownEmail').textContent  = user.email;
-<<<<<<< HEAD
+
     // Pre-fill settings name/email
     document.getElementById('settingName').value  = user.name;
     document.getElementById('settingEmail').value = user.email;
+
     loginScreen.classList.add('hidden');
     switchPage('dashboard');
-}
-
-loginBtn.addEventListener('click', attemptLogin);
-document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
-document.getElementById('loginEmail').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginPassword').focus(); });
-
-document.getElementById('logoutBtn').addEventListener('click', e => {
-    e.preventDefault();
-    appState.currentUser = null;
-    loginScreen.classList.remove('hidden');
-    document.getElementById('loginEmail').value = '';
-    document.getElementById('loginPassword').value = '';
-    switchPage('dashboard');
-});
-
-// ════════════════════════════════════════
-// DASHBOARD — ENCRYPT / DECRYPT
-// ════════════════════════════════════════
-let encryptFileData = null;
-let decryptFileData = null;
-
-=======
-    loginScreen.classList.add('hidden');
 }
 
 loginBtn.addEventListener('click', attemptLogin);
@@ -249,29 +177,20 @@ document.getElementById('loginEmail').addEventListener('keydown', e => {
 // ── Logout ────────────────────────────────────────────────────────────────
 document.getElementById('logoutBtn').addEventListener('click', e => {
     e.preventDefault();
+    appState.currentUser = null;
     loginScreen.classList.remove('hidden');
     document.getElementById('loginEmail').value    = '';
     document.getElementById('loginPassword').value = '';
-});
-
-// ── Nav active links ──────────────────────────────────────────────────────
-document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', e => {
-        e.preventDefault();
-        document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
-        link.classList.add('active');
-    });
+    switchPage('dashboard');
 });
 
 // ════════════════════════════════════════
-// ORIGINAL SCRIPT
+// DASHBOARD — ENCRYPT / DECRYPT
 // ════════════════════════════════════════
-
 let encryptFileData = null;
 let decryptFileData = null;
 
 // ── DOM references ──────────────────────────────────────────────────────────
->>>>>>> 8e48cd4ec4e774adf044dc1c6427c1300a05be33
 const encryptUpload      = document.getElementById('encryptUpload');
 const encryptFileInput   = document.getElementById('encryptFile');
 const encryptFileDisplay = document.getElementById('encryptFileDisplay');
@@ -312,11 +231,11 @@ encryptPasswordEl.addEventListener('input', () => {
     const val = encryptPasswordEl.value;
     if (!val) { encryptStrength.textContent = ''; return; }
     let score = 0;
-    if (val.length >= 8)  score++;
-    if (val.length >= 12) score++;
-    if (/[A-Z]/.test(val)) score++;
-    if (/[0-9]/.test(val)) score++;
-    if (/[^A-Za-z0-9]/.test(val)) score++;
+    if (val.length >= 8)             score++;
+    if (val.length >= 12)            score++;
+    if (/[A-Z]/.test(val))           score++;
+    if (/[0-9]/.test(val))           score++;
+    if (/[^A-Za-z0-9]/.test(val))    score++;
     const levels = [
         { cls: 'strength-weak',   label: '⚠ Weak' },
         { cls: 'strength-weak',   label: '⚠ Weak' },
@@ -326,7 +245,7 @@ encryptPasswordEl.addEventListener('input', () => {
         { cls: 'strength-strong', label: '✦ Strong' },
     ];
     const lvl = levels[score] || levels[0];
-    encryptStrength.className = `password-strength ${lvl.cls}`;
+    encryptStrength.className   = `password-strength ${lvl.cls}`;
     encryptStrength.textContent = lvl.label;
 });
 
@@ -361,15 +280,14 @@ encryptBtn.addEventListener('click', async () => {
         updateProgress(30);
         const arrayBuffer = await encryptFileData.arrayBuffer();
         updateProgress(50);
-        const base64 = arrayBufferToBase64(arrayBuffer);
+        const base64    = arrayBufferToBase64(arrayBuffer);
         updateProgress(70);
         const encrypted = CryptoJS.AES.encrypt(base64, password).toString();
         updateProgress(90);
-        const blob = new Blob([encrypted], { type: 'application/octet-stream' });
+        const blob    = new Blob([encrypted], { type: 'application/octet-stream' });
         const outName = encryptFileData.name.replace('.pdf', '_protected.pdf');
         downloadFile(blob, outName);
         updateProgress(100);
-        // Save to history
         addFileToHistory({ name: outName, size: blob.size, type: 'encrypted', originalName: encryptFileData.name });
         addActivityLog('🔒 Encrypted', outName);
         if (appState.settings.autoClear) encryptPasswordEl.value = '';
@@ -396,12 +314,12 @@ decryptBtn.addEventListener('click', async () => {
         const encryptedText = await decryptFileData.text();
         updateProgress(50);
         const decrypted = CryptoJS.AES.decrypt(encryptedText, password);
-        const base64 = decrypted.toString(CryptoJS.enc.Utf8);
+        const base64    = decrypted.toString(CryptoJS.enc.Utf8);
         if (!base64) throw new Error('Invalid password or corrupted file');
         updateProgress(70);
         const arrayBuffer = base64ToArrayBuffer(base64);
         updateProgress(90);
-        const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+        const blob    = new Blob([arrayBuffer], { type: 'application/pdf' });
         const outName = decryptFileData.name.replace('_protected', '_unlocked');
         downloadFile(blob, outName);
         updateProgress(100);
@@ -435,7 +353,7 @@ function addFileToHistory({ name, size, type, originalName }) {
 function addActivityLog(action, filename) {
     appState.activityLog.unshift({
         action, filename,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        time:     new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         fullDate: new Date()
     });
 }
@@ -451,8 +369,8 @@ function renderFilesPage() {
     const empty = document.getElementById('filesEmpty');
 
     let files = appState.fileHistory;
-    if (activeFilter !== 'all')  files = files.filter(f => f.type === activeFilter);
-    if (searchQuery.trim())      files = files.filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    if (activeFilter !== 'all') files = files.filter(f => f.type === activeFilter);
+    if (searchQuery.trim())     files = files.filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     grid.innerHTML = '';
     if (files.length === 0) {
@@ -542,12 +460,12 @@ function loadSettingsPage() {
         document.getElementById('settingName').value  = appState.currentUser.name;
         document.getElementById('settingEmail').value = appState.currentUser.email;
     }
-    document.getElementById('settingMinPass').value      = appState.settings.minPassLength;
-    document.getElementById('settingAutoClear').checked  = appState.settings.autoClear;
+    document.getElementById('settingMinPass').value        = appState.settings.minPassLength;
+    document.getElementById('settingAutoClear').checked    = appState.settings.autoClear;
     document.getElementById('settingPassStrength').checked = appState.settings.showStrength;
-    document.getElementById('settingTheme').value        = appState.settings.theme;
+    document.getElementById('settingTheme').value          = appState.settings.theme;
     document.getElementById('settingReduceMotion').checked = appState.settings.reduceMotion;
-    document.getElementById('settingHistory').checked    = appState.settings.saveHistory;
+    document.getElementById('settingHistory').checked      = appState.settings.saveHistory;
 }
 
 document.getElementById('saveAccountBtn').addEventListener('click', () => {
@@ -592,8 +510,8 @@ document.getElementById('settingHistory').addEventListener('change', e => {
 });
 document.getElementById('clearAllDataBtn').addEventListener('click', () => {
     if (confirm('Clear all file history and activity logs? This cannot be undone.')) {
-        appState.fileHistory  = [];
-        appState.activityLog  = [];
+        appState.fileHistory = [];
+        appState.activityLog = [];
         showSettingsToast('🗑 All data cleared.');
     }
 });
@@ -640,26 +558,32 @@ function arrayBufferToBase64(buffer) {
     for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
     return btoa(binary);
 }
+
 function base64ToArrayBuffer(base64) {
     const binaryString = atob(base64);
     const bytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
     return bytes.buffer;
 }
+
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
-    const k = 1024, sizes = ['Bytes','KB','MB','GB'];
+    const k = 1024, sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
+
 function downloadFile(blob, filename) {
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click();
+    const a   = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
+
 function showStatus(type, message, filename = null) {
     const icons = { success: '✨', error: '🚫', processing: '⏳' };
     statusContainer.className = 'status-container ' + type;
@@ -677,6 +601,7 @@ function showStatus(type, message, filename = null) {
     statusContainer.appendChild(progressBar);
     if (type !== 'processing') progressBar.classList.remove('active');
 }
+
 function updateProgress(percent) {
     progressFill.style.width = percent + '%';
 }
