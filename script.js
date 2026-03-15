@@ -1,9 +1,25 @@
 // ════════════════════════════════════════
+// ROLES
+// ════════════════════════════════════════
+const ROLES = {
+    user:    { label: 'User',    icon: '👤', badge: 'Pro',     color: '#5a7355' },
+    manager: { label: 'Manager', icon: '👔', badge: 'Manager', color: '#2e6d9e' },
+    admin:   { label: 'Admin',   icon: '🛡', badge: 'Admin',   color: '#7b2d8a' }
+};
+
+const ROLE_PAGES = {
+    user:    ['dashboard','files','activity','settings'],
+    manager: ['dashboard','files','activity','team','settings'],
+    admin:   ['dashboard','files','activity','team','admin','settings']
+};
+
+// ════════════════════════════════════════
 // APP STATE
 // ════════════════════════════════════════
 const appState = {
-    fileHistory: [],      // { id, name, size, type:'encrypted'|'decrypted', date }
-    activityLog: [],      // { action, filename, time }
+    fileHistory: [],
+    activityLog: [],
+    systemLog:   [],
     settings: {
         minPassLength: 6,
         autoClear: true,
@@ -16,9 +32,28 @@ const appState = {
 };
 
 // ════════════════════════════════════════
+// USER STORE (in-memory demo "database")
+// ════════════════════════════════════════
+const userStore = [
+    { email: 'demo@encryptify.app',    password: 'demo1234',   name: 'Demo User',      role: 'user',    status: 'active',   joined: '2024-01-15' },
+    { email: 'manager@encryptify.app', password: 'manager123', name: 'Maya Rodriguez', role: 'manager', status: 'active',   joined: '2023-11-03' },
+    { email: 'admin@encryptify.app',   password: 'admin123',   name: 'Admin System',   role: 'admin',   status: 'active',   joined: '2023-06-01' }
+];
+
+// ════════════════════════════════════════
 // PAGE NAVIGATION
 // ════════════════════════════════════════
 function switchPage(page) {
+    // Role gate
+    const user = appState.currentUser;
+    if (user) {
+        const allowed = ROLE_PAGES[user.role] || ROLE_PAGES.user;
+        if (!allowed.includes(page)) {
+            showAccessDenied();
+            return;
+        }
+    }
+
     document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active-page'));
     document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
 
@@ -28,12 +63,17 @@ function switchPage(page) {
     const link = document.querySelector(`.nav-links a[data-page="${page}"]`);
     if (link) link.classList.add('active');
 
-    // Refresh dynamic pages
     if (page === 'files')    renderFilesPage();
     if (page === 'activity') renderActivityPage();
     if (page === 'settings') loadSettingsPage();
+    if (page === 'team')     renderTeamPage();
+    if (page === 'admin')    renderAdminPage();
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showAccessDenied() {
+    showSettingsToast('🚫 Access denied: insufficient permissions.');
 }
 
 document.querySelectorAll('.nav-links a').forEach(link => {
@@ -49,40 +89,59 @@ document.getElementById('navBrandLink').addEventListener('click', e => {
 });
 
 // ════════════════════════════════════════
+// APPLY ROLE UI
+// ════════════════════════════════════════
+function applyRoleUI(role) {
+    const r = ROLES[role] || ROLES.user;
+
+    // Badge
+    const badge = document.getElementById('navRoleBadge');
+    badge.textContent = r.badge;
+    badge.className   = 'nav-badge role-badge-' + role;
+
+    // Dropdown role pill
+    const drRole = document.getElementById('dropdownRole');
+    drRole.textContent = `${r.icon} ${r.label}`;
+    drRole.className   = 'avatar-dropdown-role role-pill-' + role;
+
+    // Show/hide nav items
+    document.querySelectorAll('.nav-item-manager').forEach(el => {
+        el.style.display = (role === 'manager' || role === 'admin') ? '' : 'none';
+    });
+    document.querySelectorAll('.nav-item-admin').forEach(el => {
+        el.style.display = role === 'admin' ? '' : 'none';
+    });
+
+    // Role-specific nav badge color
+    badge.style.background = r.color + '22';
+    badge.style.color      = r.color;
+    badge.style.borderColor = r.color + '44';
+}
+
+// ════════════════════════════════════════
 // LOGIN / REGISTER / NAV
 // ════════════════════════════════════════
-const DEMO_USER = { email: 'demo@encryptify.app', password: 'demo1234', name: 'Demo User' };
-
-// In-memory user store (simulates a database for this demo)
-const userStore = [{ ...DEMO_USER }];
-
 const loginScreen   = document.getElementById('loginScreen');
 const registerModal = document.getElementById('registerModal');
 const loginBtn      = document.getElementById('loginBtn');
 const loginError    = document.getElementById('loginError');
 
-// ── Open / close register modal ───────────────────────────────────────────
+// Demo pill autofill
+window.fillDemo = function(email, pass) {
+    document.getElementById('loginEmail').value    = email;
+    document.getElementById('loginPassword').value = pass;
+    document.getElementById('loginPassword').focus();
+};
+
 document.getElementById('openRegisterBtn').addEventListener('click', e => {
     e.preventDefault();
     registerModal.classList.add('visible');
     clearRegisterForm();
 });
+document.getElementById('closeRegisterBtn').addEventListener('click', () => registerModal.classList.remove('visible'));
+document.getElementById('backToLoginBtn').addEventListener('click', e => { e.preventDefault(); registerModal.classList.remove('visible'); });
+registerModal.addEventListener('click', e => { if (e.target === registerModal) registerModal.classList.remove('visible'); });
 
-document.getElementById('closeRegisterBtn').addEventListener('click', () => {
-    registerModal.classList.remove('visible');
-});
-
-document.getElementById('backToLoginBtn').addEventListener('click', e => {
-    e.preventDefault();
-    registerModal.classList.remove('visible');
-});
-
-// Close modal when clicking the backdrop
-registerModal.addEventListener('click', e => {
-    if (e.target === registerModal) registerModal.classList.remove('visible');
-});
-
-// ── Register logic ────────────────────────────────────────────────────────
 document.getElementById('registerBtn').addEventListener('click', () => {
     const firstName = document.getElementById('regFirstName').value.trim();
     const lastName  = document.getElementById('regLastName').value.trim();
@@ -96,21 +155,17 @@ document.getElementById('registerBtn').addEventListener('click', () => {
     errorEl.style.display   = 'none';
     successEl.style.display = 'none';
 
-    // Validation
     if (!firstName || !lastName)        return showRegisterError('Please enter your first and last name.');
     if (!email || !email.includes('@')) return showRegisterError('Please enter a valid email address.');
     if (password.length < 6)           return showRegisterError('Password must be at least 6 characters.');
     if (password !== confirm)          return showRegisterError('Passwords do not match.');
     if (!agreed)                        return showRegisterError('Please agree to the Terms of Service.');
-
-    // Check duplicate email
     if (userStore.find(u => u.email === email)) return showRegisterError('An account with this email already exists.');
 
-    // Save new user
-    const newUser = { email, password, name: `${firstName} ${lastName}` };
+    const newUser = { email, password, name: `${firstName} ${lastName}`, role: 'user', status: 'active', joined: new Date().toISOString().split('T')[0] };
     userStore.push(newUser);
+    addSystemLog(`New user registered: ${newUser.name} (${email})`);
 
-    // Show success, then auto-login after 1.8s
     successEl.textContent   = `🎉 Account created! Welcome, ${firstName}! Signing you in...`;
     successEl.style.display = 'block';
 
@@ -127,24 +182,29 @@ function showRegisterError(msg) {
 }
 
 function clearRegisterForm() {
-    ['regFirstName', 'regLastName', 'regEmail', 'regPassword', 'regConfirmPassword'].forEach(id => {
+    ['regFirstName','regLastName','regEmail','regPassword','regConfirmPassword'].forEach(id => {
         document.getElementById(id).value = '';
     });
-    document.getElementById('agreeTerms').checked           = false;
-    document.getElementById('registerError').style.display  = 'none';
+    document.getElementById('agreeTerms').checked            = false;
+    document.getElementById('registerError').style.display   = 'none';
     document.getElementById('registerSuccess').style.display = 'none';
 }
 
-// ── Login logic ───────────────────────────────────────────────────────────
 function attemptLogin() {
     const email = document.getElementById('loginEmail').value.trim();
     const pass  = document.getElementById('loginPassword').value;
     const user  = userStore.find(u => u.email === email && u.password === pass);
 
     if (user) {
+        if (user.status === 'suspended') {
+            loginError.textContent = '🚫 This account has been suspended. Contact admin.';
+            loginError.style.display = 'block';
+            return;
+        }
         loginError.style.display = 'none';
         loginWithUser(user);
     } else {
+        loginError.textContent   = 'Invalid email or password. Please try again.';
         loginError.style.display = 'block';
         document.getElementById('loginPassword').value = '';
         document.getElementById('loginPassword').focus();
@@ -157,26 +217,23 @@ function loginWithUser(user) {
     document.getElementById('avatarInitials').textContent = initials;
     document.getElementById('dropdownName').textContent   = user.name;
     document.getElementById('dropdownEmail').textContent  = user.email;
-
-    // Pre-fill settings name/email
     document.getElementById('settingName').value  = user.name;
     document.getElementById('settingEmail').value = user.email;
+
+    applyRoleUI(user.role);
+    addSystemLog(`User logged in: ${user.name} [${user.role}]`);
 
     loginScreen.classList.add('hidden');
     switchPage('dashboard');
 }
 
 loginBtn.addEventListener('click', attemptLogin);
-document.getElementById('loginPassword').addEventListener('keydown', e => {
-    if (e.key === 'Enter') attemptLogin();
-});
-document.getElementById('loginEmail').addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('loginPassword').focus();
-});
+document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+document.getElementById('loginEmail').addEventListener('keydown',    e => { if (e.key === 'Enter') document.getElementById('loginPassword').focus(); });
 
-// ── Logout ────────────────────────────────────────────────────────────────
 document.getElementById('logoutBtn').addEventListener('click', e => {
     e.preventDefault();
+    if (appState.currentUser) addSystemLog(`User logged out: ${appState.currentUser.name}`);
     appState.currentUser = null;
     loginScreen.classList.remove('hidden');
     document.getElementById('loginEmail').value    = '';
@@ -190,7 +247,6 @@ document.getElementById('logoutBtn').addEventListener('click', e => {
 let encryptFileData = null;
 let decryptFileData = null;
 
-// ── DOM references ──────────────────────────────────────────────────────────
 const encryptUpload      = document.getElementById('encryptUpload');
 const encryptFileInput   = document.getElementById('encryptFile');
 const encryptFileDisplay = document.getElementById('encryptFileDisplay');
@@ -212,7 +268,6 @@ const statusContainer = document.getElementById('statusContainer');
 const progressBar     = document.getElementById('progressBar');
 const progressFill    = document.getElementById('progressFill');
 
-// Upload listeners
 encryptUpload.addEventListener('click', () => encryptFileInput.click());
 encryptUpload.addEventListener('dragover', e => { e.preventDefault(); encryptUpload.classList.add('dragover'); });
 encryptUpload.addEventListener('dragleave', () => encryptUpload.classList.remove('dragover'));
@@ -225,17 +280,16 @@ decryptUpload.addEventListener('dragleave', () => decryptUpload.classList.remove
 decryptUpload.addEventListener('drop', e => { e.preventDefault(); decryptUpload.classList.remove('dragover'); if (e.dataTransfer.files.length > 0) handleDecryptFile(e.dataTransfer.files[0]); });
 decryptFileInput.addEventListener('change', e => { if (e.target.files.length > 0) handleDecryptFile(e.target.files[0]); });
 
-// Password strength indicator
 encryptPasswordEl.addEventListener('input', () => {
     if (!appState.settings.showStrength) { encryptStrength.textContent = ''; return; }
     const val = encryptPasswordEl.value;
     if (!val) { encryptStrength.textContent = ''; return; }
     let score = 0;
-    if (val.length >= 8)             score++;
-    if (val.length >= 12)            score++;
-    if (/[A-Z]/.test(val))           score++;
-    if (/[0-9]/.test(val))           score++;
-    if (/[^A-Za-z0-9]/.test(val))    score++;
+    if (val.length >= 8)           score++;
+    if (val.length >= 12)          score++;
+    if (/[A-Z]/.test(val))         score++;
+    if (/[0-9]/.test(val))         score++;
+    if (/[^A-Za-z0-9]/.test(val))  score++;
     const levels = [
         { cls: 'strength-weak',   label: '⚠ Weak' },
         { cls: 'strength-weak',   label: '⚠ Weak' },
@@ -346,13 +400,23 @@ function addFileToHistory({ name, size, type, originalName }) {
     appState.fileHistory.unshift({
         id: Date.now(),
         name, size, type, originalName,
-        date: new Date().toLocaleString()
+        date: new Date().toLocaleString(),
+        user: appState.currentUser ? appState.currentUser.name : 'Unknown'
     });
 }
 
 function addActivityLog(action, filename) {
     appState.activityLog.unshift({
         action, filename,
+        time:     new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        fullDate: new Date(),
+        user:     appState.currentUser ? appState.currentUser.name : 'Unknown'
+    });
+}
+
+function addSystemLog(msg) {
+    appState.systemLog.unshift({
+        msg,
         time:     new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         fullDate: new Date()
     });
@@ -406,11 +470,7 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
         renderFilesPage();
     });
 });
-
-document.getElementById('filesSearch').addEventListener('input', e => {
-    searchQuery = e.target.value;
-    renderFilesPage();
-});
+document.getElementById('filesSearch').addEventListener('input', e => { searchQuery = e.target.value; renderFilesPage(); });
 
 // ════════════════════════════════════════
 // ACTIVITY PAGE
@@ -421,8 +481,7 @@ function renderActivityPage() {
     const total = appState.fileHistory.length;
     const today = appState.fileHistory.filter(f => {
         const d = new Date(f.date);
-        const n = new Date();
-        return d.toDateString() === n.toDateString();
+        return d.toDateString() === new Date().toDateString();
     }).length;
 
     document.getElementById('statEncrypted').textContent = enc;
@@ -437,7 +496,7 @@ function renderActivityPage() {
     }
     log.innerHTML = appState.activityLog.map(item => `
         <div class="activity-item">
-            <div class="activity-dot ${item.action.includes('Encrypted') || item.action.includes('🔒') ? 'dot-encrypt' : 'dot-decrypt'}">${item.action.split(' ')[0]}</div>
+            <div class="activity-dot ${item.action.includes('🔒') ? 'dot-encrypt' : 'dot-decrypt'}">${item.action.split(' ')[0]}</div>
             <div class="activity-info">
                 <div class="activity-action">${item.action}</div>
                 <div class="activity-filename">${item.filename}</div>
@@ -453,12 +512,228 @@ document.getElementById('clearLogBtn').addEventListener('click', () => {
 });
 
 // ════════════════════════════════════════
+// TEAM PAGE (Manager + Admin)
+// ════════════════════════════════════════
+function renderTeamPage() {
+    const user = appState.currentUser;
+    if (!user || (user.role !== 'manager' && user.role !== 'admin')) return;
+
+    // Subtitle
+    document.getElementById('teamSubtitle').textContent =
+        user.role === 'admin' ? 'Admin view — all users' : 'Manager view — your team';
+
+    // Stats
+    const allEnc = appState.fileHistory.filter(f => f.type === 'encrypted').length;
+    const allDec = appState.fileHistory.filter(f => f.type === 'decrypted').length;
+    document.getElementById('teamStatMembers').textContent  = userStore.length;
+    document.getElementById('teamStatEncrypted').textContent = allEnc;
+    document.getElementById('teamStatDecrypted').textContent = allDec;
+    document.getElementById('teamStatActive').textContent   = Math.min(userStore.filter(u => u.status === 'active').length, 3);
+
+    // Members
+    const list = document.getElementById('teamMembersList');
+    const visibleUsers = user.role === 'admin' ? userStore : userStore.filter(u => u.role === 'user');
+    list.innerHTML = visibleUsers.map(u => {
+        const r = ROLES[u.role] || ROLES.user;
+        const initials = u.name.split(' ').map(w => w[0]).join('').toUpperCase();
+        return `
+            <div class="team-member-row">
+                <div class="team-member-avatar" style="background: linear-gradient(135deg, ${r.color}44, ${r.color}88)">
+                    <span style="color:${r.color};font-weight:700;font-size:0.85rem">${initials}</span>
+                </div>
+                <div class="team-member-info">
+                    <div class="team-member-name">${u.name} ${u.email === appState.currentUser.email ? '<span class="team-you-tag">you</span>' : ''}</div>
+                    <div class="team-member-email">${u.email}</div>
+                </div>
+                <span class="team-role-pill role-pill-${u.role}">${r.icon} ${r.label}</span>
+                <span class="team-status-pill status-${u.status}">${u.status === 'active' ? '● Active' : '○ Suspended'}</span>
+                <div class="team-member-joined">Joined ${u.joined}</div>
+            </div>
+        `;
+    }).join('');
+
+    // Team Activity Log
+    const teamLog = document.getElementById('teamActivityLog');
+    if (appState.activityLog.length === 0) {
+        teamLog.innerHTML = '<div class="activity-empty">No team activity yet.</div>';
+        return;
+    }
+    teamLog.innerHTML = appState.activityLog.slice(0, 20).map(item => `
+        <div class="activity-item">
+            <div class="activity-dot ${item.action.includes('🔒') ? 'dot-encrypt' : 'dot-decrypt'}">${item.action.split(' ')[0]}</div>
+            <div class="activity-info">
+                <div class="activity-action">${item.action} <span style="color:var(--sage);font-weight:400;font-size:0.8rem">by ${item.user || 'Unknown'}</span></div>
+                <div class="activity-filename">${item.filename}</div>
+            </div>
+            <div class="activity-time">${item.time}</div>
+        </div>
+    `).join('');
+}
+
+// ════════════════════════════════════════
+// ADMIN PAGE
+// ════════════════════════════════════════
+function renderAdminPage() {
+    const user = appState.currentUser;
+    if (!user || user.role !== 'admin') return;
+
+    // Stats
+    document.getElementById('adminStatUsers').textContent    = userStore.length;
+    document.getElementById('adminStatAdmins').textContent   = userStore.filter(u => u.role === 'admin').length;
+    document.getElementById('adminStatManagers').textContent = userStore.filter(u => u.role === 'manager').length;
+    document.getElementById('adminStatOps').textContent      = appState.fileHistory.length;
+
+    // User table
+    const tbody = document.getElementById('adminUserTableBody');
+    tbody.innerHTML = userStore.map((u, idx) => {
+        const r = ROLES[u.role] || ROLES.user;
+        const initials = u.name.split(' ').map(w => w[0]).join('').toUpperCase();
+        const isSelf   = u.email === appState.currentUser.email;
+        return `
+            <tr class="${u.status === 'suspended' ? 'row-suspended' : ''}">
+                <td>
+                    <div class="admin-user-cell">
+                        <div class="admin-user-avatar" style="background:${r.color}22;color:${r.color}">${initials}</div>
+                        <span>${u.name} ${isSelf ? '<span class="team-you-tag">you</span>' : ''}</span>
+                    </div>
+                </td>
+                <td class="admin-email-cell">${u.email}</td>
+                <td>
+                    <select class="admin-role-select" data-idx="${idx}" ${isSelf ? 'disabled' : ''}>
+                        <option value="user"    ${u.role === 'user'    ? 'selected' : ''}>👤 User</option>
+                        <option value="manager" ${u.role === 'manager' ? 'selected' : ''}>👔 Manager</option>
+                        <option value="admin"   ${u.role === 'admin'   ? 'selected' : ''}>🛡 Admin</option>
+                    </select>
+                </td>
+                <td>
+                    <span class="team-status-pill status-${u.status}">${u.status === 'active' ? '● Active' : '○ Suspended'}</span>
+                </td>
+                <td>
+                    <div class="admin-actions">
+                        ${!isSelf ? `
+                        <button class="admin-btn admin-btn-toggle" data-idx="${idx}" title="${u.status === 'active' ? 'Suspend' : 'Activate'}">
+                            ${u.status === 'active' ? '🚫' : '✅'}
+                        </button>
+                        <button class="admin-btn admin-btn-delete" data-idx="${idx}" title="Delete user">🗑</button>
+                        ` : '<span style="opacity:0.35;font-size:0.8rem">—</span>'}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    // Bind role change
+    tbody.querySelectorAll('.admin-role-select').forEach(sel => {
+        sel.addEventListener('change', e => {
+            const idx     = parseInt(e.target.dataset.idx);
+            const oldRole = userStore[idx].role;
+            const newRole = e.target.value;
+            userStore[idx].role = newRole;
+            addSystemLog(`Role changed: ${userStore[idx].name} → ${newRole} (was ${oldRole})`);
+            showSettingsToast(`✓ ${userStore[idx].name}'s role updated to ${newRole}`);
+            renderAdminPage(); // refresh
+        });
+    });
+
+    // Bind toggle suspend
+    tbody.querySelectorAll('.admin-btn-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.dataset.idx);
+            const u   = userStore[idx];
+            u.status  = u.status === 'active' ? 'suspended' : 'active';
+            addSystemLog(`User ${u.status === 'suspended' ? 'suspended' : 'reactivated'}: ${u.name}`);
+            showSettingsToast(`${u.status === 'suspended' ? '🚫 Suspended' : '✅ Reactivated'}: ${u.name}`);
+            renderAdminPage();
+        });
+    });
+
+    // Bind delete
+    tbody.querySelectorAll('.admin-btn-delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.dataset.idx);
+            if (!confirm(`Delete user "${userStore[idx].name}"? This cannot be undone.`)) return;
+            const removed = userStore.splice(idx, 1)[0];
+            addSystemLog(`User deleted: ${removed.name} (${removed.email})`);
+            showSettingsToast(`🗑 Deleted: ${removed.name}`);
+            renderAdminPage();
+        });
+    });
+
+    // System log
+    const sysLog = document.getElementById('systemLog');
+    if (appState.systemLog.length === 0) {
+        sysLog.innerHTML = '<div class="activity-empty">No system events recorded.</div>';
+        return;
+    }
+    sysLog.innerHTML = appState.systemLog.map(item => `
+        <div class="activity-item">
+            <div class="activity-dot dot-encrypt" style="background:rgba(123,45,138,0.12)">🖥</div>
+            <div class="activity-info">
+                <div class="activity-action" style="color:var(--deep-green)">${item.msg}</div>
+            </div>
+            <div class="activity-time">${item.time}</div>
+        </div>
+    `).join('');
+}
+
+// System log clear
+document.getElementById('clearSystemLogBtn').addEventListener('click', () => {
+    appState.systemLog = [];
+    renderAdminPage();
+});
+
+// ════════════════════════════════════════
+// ADD USER MODAL (Admin)
+// ════════════════════════════════════════
+const addUserModal = document.getElementById('addUserModal');
+
+document.getElementById('addUserBtn').addEventListener('click', () => {
+    addUserModal.classList.add('visible');
+    document.getElementById('addUserFirstName').value = '';
+    document.getElementById('addUserLastName').value  = '';
+    document.getElementById('addUserEmail').value     = '';
+    document.getElementById('addUserPassword').value  = '';
+    document.getElementById('addUserRole').value      = 'user';
+    document.getElementById('addUserError').style.display = 'none';
+});
+
+document.getElementById('closeAddUserBtn').addEventListener('click', () => addUserModal.classList.remove('visible'));
+addUserModal.addEventListener('click', e => { if (e.target === addUserModal) addUserModal.classList.remove('visible'); });
+
+document.getElementById('confirmAddUserBtn').addEventListener('click', () => {
+    const firstName = document.getElementById('addUserFirstName').value.trim();
+    const lastName  = document.getElementById('addUserLastName').value.trim();
+    const email     = document.getElementById('addUserEmail').value.trim();
+    const password  = document.getElementById('addUserPassword').value;
+    const role      = document.getElementById('addUserRole').value;
+    const errEl     = document.getElementById('addUserError');
+
+    errEl.style.display = 'none';
+    if (!firstName || !lastName)         { errEl.textContent = 'Please enter first and last name.'; errEl.style.display = 'block'; return; }
+    if (!email || !email.includes('@'))  { errEl.textContent = 'Please enter a valid email.';       errEl.style.display = 'block'; return; }
+    if (password.length < 6)            { errEl.textContent = 'Password must be at least 6 chars.'; errEl.style.display = 'block'; return; }
+    if (userStore.find(u => u.email === email)) { errEl.textContent = 'Email already in use.'; errEl.style.display = 'block'; return; }
+
+    const newUser = { email, password, name: `${firstName} ${lastName}`, role, status: 'active', joined: new Date().toISOString().split('T')[0] };
+    userStore.push(newUser);
+    addSystemLog(`Admin created user: ${newUser.name} [${role}]`);
+    showSettingsToast(`✓ User "${newUser.name}" created as ${role}`);
+    addUserModal.classList.remove('visible');
+    renderAdminPage();
+});
+
+// ════════════════════════════════════════
 // SETTINGS PAGE
 // ════════════════════════════════════════
 function loadSettingsPage() {
-    if (appState.currentUser) {
-        document.getElementById('settingName').value  = appState.currentUser.name;
-        document.getElementById('settingEmail').value = appState.currentUser.email;
+    const user = appState.currentUser;
+    if (user) {
+        document.getElementById('settingName').value  = user.name;
+        document.getElementById('settingEmail').value = user.email;
+        const r = ROLES[user.role] || ROLES.user;
+        const badge = document.getElementById('settingsRoleBadge');
+        badge.textContent = `${r.icon} ${r.label}`;
+        badge.className   = `settings-role-badge role-pill-${user.role}`;
     }
     document.getElementById('settingMinPass').value        = appState.settings.minPassLength;
     document.getElementById('settingAutoClear').checked    = appState.settings.autoClear;
@@ -484,30 +759,12 @@ document.getElementById('saveAccountBtn').addEventListener('click', () => {
     showSettingsToast('✓ Account details saved!');
 });
 
-document.getElementById('settingMinPass').addEventListener('change', e => {
-    appState.settings.minPassLength = parseInt(e.target.value);
-    showSettingsToast('✓ Security settings updated.');
-});
-document.getElementById('settingAutoClear').addEventListener('change', e => {
-    appState.settings.autoClear = e.target.checked;
-});
-document.getElementById('settingPassStrength').addEventListener('change', e => {
-    appState.settings.showStrength = e.target.checked;
-    if (!e.target.checked) encryptStrength.textContent = '';
-});
-document.getElementById('settingTheme').addEventListener('change', e => {
-    appState.settings.theme = e.target.value;
-    applyTheme(e.target.value);
-    showSettingsToast('✓ Theme applied!');
-});
-document.getElementById('settingReduceMotion').addEventListener('change', e => {
-    appState.settings.reduceMotion = e.target.checked;
-    document.body.style.setProperty('--anim-speed', e.target.checked ? '0.01s' : '');
-    showSettingsToast(e.target.checked ? '✓ Animations reduced.' : '✓ Animations restored.');
-});
-document.getElementById('settingHistory').addEventListener('change', e => {
-    appState.settings.saveHistory = e.target.checked;
-});
+document.getElementById('settingMinPass').addEventListener('change', e => { appState.settings.minPassLength = parseInt(e.target.value); showSettingsToast('✓ Security settings updated.'); });
+document.getElementById('settingAutoClear').addEventListener('change', e => { appState.settings.autoClear = e.target.checked; });
+document.getElementById('settingPassStrength').addEventListener('change', e => { appState.settings.showStrength = e.target.checked; if (!e.target.checked) encryptStrength.textContent = ''; });
+document.getElementById('settingTheme').addEventListener('change', e => { appState.settings.theme = e.target.value; applyTheme(e.target.value); showSettingsToast('✓ Theme applied!'); });
+document.getElementById('settingReduceMotion').addEventListener('change', e => { appState.settings.reduceMotion = e.target.checked; document.body.style.setProperty('--anim-speed', e.target.checked ? '0.01s' : ''); showSettingsToast(e.target.checked ? '✓ Animations reduced.' : '✓ Animations restored.'); });
+document.getElementById('settingHistory').addEventListener('change', e => { appState.settings.saveHistory = e.target.checked; });
 document.getElementById('clearAllDataBtn').addEventListener('click', () => {
     if (confirm('Clear all file history and activity logs? This cannot be undone.')) {
         appState.fileHistory = [];
@@ -576,10 +833,8 @@ function formatFileSize(bytes) {
 function downloadFile(blob, filename) {
     const url = URL.createObjectURL(blob);
     const a   = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
