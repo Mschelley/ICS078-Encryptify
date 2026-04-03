@@ -7,7 +7,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
-</head>
 <body>
 
 <div class="texture-overlay"></div>
@@ -105,7 +104,7 @@
         </div>
     </nav>
 
-    
+    <!-- DASHBOARD -->
     <div id="page-dashboard" class="page-view active-page">
         <div class="container">
             <header><h1 class="logo-text">Encryptify</h1><p class="tagline">PDF Protection</p></header>
@@ -155,7 +154,7 @@
         </div>
     </div>
 
-   
+    <!-- MY FILES -->
     <div id="page-files" class="page-view">
         <div class="container">
             <header><h1 class="logo-text">My Files</h1><p class="tagline">Your Protected Documents</p></header>
@@ -180,7 +179,7 @@
         </div>
     </div>
 
-    
+    <!-- ACTIVITY -->
     <div id="page-activity" class="page-view">
         <div class="container">
             <header><h1 class="logo-text">Activity</h1><p class="tagline">Your Recent Actions</p></header>
@@ -190,6 +189,26 @@
                 <div class="stat-card"><div class="stat-icon">📁</div><div class="stat-value" id="statTotal">0</div><div class="stat-label">Total Files</div></div>
                 <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-value" id="statToday">0</div><div class="stat-label">Today</div></div>
             </div>
+
+            <!-- ── CHART CARD (new) ── -->
+            <div class="activity-card" style="margin-bottom:24px">
+                <div class="activity-card-header">
+                    <span class="activity-card-title">📈 &nbsp;Operations Over Time</span>
+                    <select id="chartRange" class="settings-select" style="font-size:0.8rem;padding:6px 12px;min-width:unset;width:auto">
+                        <option value="7">Last 7 days</option>
+                        <option value="14">Last 14 days</option>
+                        <option value="30" selected>Last 30 days</option>
+                    </select>
+                </div>
+                <div style="position:relative;height:230px;padding:12px 16px 4px">
+                    <canvas id="activityChart" style="width:100%;height:100%"></canvas>
+                </div>
+                <div style="display:flex;gap:20px;justify-content:center;padding:10px 16px 18px;font-size:0.8rem;color:var(--earth)">
+                    <span><span style="display:inline-block;width:12px;height:12px;background:#5a7355;border-radius:3px;margin-right:5px;vertical-align:middle"></span>Encrypted</span>
+                    <span><span style="display:inline-block;width:12px;height:12px;background:#d4a373;border-radius:3px;margin-right:5px;vertical-align:middle"></span>Decrypted</span>
+                </div>
+            </div>
+
             <div class="activity-card">
                 <div class="activity-card-header">
                     <span class="activity-card-title">📋 &nbsp;Recent Actions</span>
@@ -200,7 +219,7 @@
         </div>
     </div>
 
-    
+    <!-- TEAM -->
     <div id="page-team" class="page-view">
         <div class="container">
             <header><h1 class="logo-text">Team Overview</h1><p class="tagline">Monitor Team Activity</p></header>
@@ -224,6 +243,7 @@
         </div>
     </div>
 
+    <!-- ADMIN -->
     <div id="page-admin" class="page-view">
         <div class="container">
             <header><h1 class="logo-text">Admin Panel</h1><p class="tagline">User &amp; System Management</p></header>
@@ -255,7 +275,7 @@
         </div>
     </div>
 
-   
+    <!-- SETTINGS -->
     <div id="page-settings" class="page-view">
         <div class="container">
             <header><h1 class="logo-text">Settings</h1><p class="tagline">Preferences &amp; Account</p></header>
@@ -289,7 +309,7 @@
     </div>
 </div>
 
-
+<!-- ADD USER MODAL -->
 <div id="addUserModal">
     <div class="register-card" style="max-width:420px">
         <button class="register-close" id="closeAddUserBtn">✕</button>

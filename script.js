@@ -1,6 +1,3 @@
-// ═══════════════════════════════════════
-// ROLES
-// ═══════════════════════════════════════
 const ROLES = {
     user:    { label: 'User',    icon: '👤', badge: 'Pro',     color: '#5a7355' },
     manager: { label: 'Manager', icon: '👔', badge: 'Manager', color: '#2e6d9e' },
@@ -12,9 +9,6 @@ const ROLE_PAGES = {
     admin:   ['dashboard','files','activity','team','admin','settings']
 };
 
-// ═══════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════
 const appState = {
     fileHistory: [], activityLog: [], systemLog: [],
     settings: { minPassLength:6, autoClear:true, showStrength:true, theme:'natural', reduceMotion:false, saveHistory:true },
@@ -27,9 +21,8 @@ const userStore = [
     { email:'admin@encryptify.app',   password:'admin123',   name:'Admin System',   role:'admin',   status:'active', joined:'2023-06-01' }
 ];
 
-// ═══════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+
 function switchPage(page) {
     const user = appState.currentUser;
     if (user) {
@@ -55,9 +48,6 @@ document.querySelectorAll('.nav-links a').forEach(link => {
 });
 document.getElementById('navBrandLink').addEventListener('click', e => { e.preventDefault(); switchPage('dashboard'); });
 
-// ═══════════════════════════════════════
-// ROLE UI
-// ═══════════════════════════════════════
 function applyRoleUI(role) {
     const r = ROLES[role] || ROLES.user;
     const badge = document.getElementById('navRoleBadge');
@@ -72,9 +62,8 @@ function applyRoleUI(role) {
     document.querySelectorAll('.nav-item-admin').forEach(el => { el.style.display = role==='admin' ? '' : 'none'; });
 }
 
-// ═══════════════════════════════════════
-// AUTH
-// ═══════════════════════════════════════
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+
 window.fillDemo = function(email, pass) {
     document.getElementById('loginEmail').value    = email;
     document.getElementById('loginPassword').value = pass;
@@ -98,11 +87,11 @@ document.getElementById('registerBtn').addEventListener('click', () => {
     const agreed    = document.getElementById('agreeTerms').checked;
     document.getElementById('registerError').style.display   = 'none';
     document.getElementById('registerSuccess').style.display = 'none';
-    if (!firstName||!lastName)       return showReg('Please enter your first and last name.');
-    if (!email||!email.includes('@')) return showReg('Please enter a valid email address.');
-    if (password.length < 6)         return showReg('Password must be at least 6 characters.');
-    if (password !== confirm)         return showReg('Passwords do not match.');
-    if (!agreed)                      return showReg('Please agree to the Terms of Service.');
+    if (!firstName||!lastName)        return showReg('Please enter your first and last name.');
+    if (!email||!email.includes('@'))  return showReg('Please enter a valid email address.');
+    if (password.length < 6)          return showReg('Password must be at least 6 characters.');
+    if (password !== confirm)          return showReg('Passwords do not match.');
+    if (!agreed)                       return showReg('Please agree to the Terms of Service.');
     if (userStore.find(u => u.email===email)) return showReg('An account with this email already exists.');
     const newUser = { email, password, name: firstName+' '+lastName, role:'user', status:'active', joined: new Date().toISOString().split('T')[0] };
     userStore.push(newUser);
@@ -143,6 +132,7 @@ function loginWithUser(user) {
     document.getElementById('settingName').value  = user.name;
     document.getElementById('settingEmail').value = user.email;
     applyRoleUI(user.role);
+    applyTheme(appState.settings.theme);
     addSystemLog('User logged in: ' + user.name + ' [' + user.role + ']');
     loginScreen.classList.add('hidden');
     switchPage('dashboard');
@@ -161,9 +151,8 @@ document.getElementById('logoutBtn').addEventListener('click', e => {
     switchPage('dashboard');
 });
 
-// ═══════════════════════════════════════
-// DASHBOARD
-// ═══════════════════════════════════════
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+
 let encryptFileData=null, decryptFileData=null;
 
 const encryptUpload      = document.getElementById('encryptUpload');
@@ -262,12 +251,11 @@ decryptBtn.addEventListener('click', async () => {
     } catch(e){ showStatus('error','❌ Unlock failed: Wrong password or corrupted file'); progressBar.classList.remove('active'); updateProgress(0); }
 });
 
-// ═══════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+
 function addFileToHistory({name,size,type,originalName}) {
     if(!appState.settings.saveHistory) return;
-    appState.fileHistory.unshift({id:Date.now(),name,size,type,originalName,date:new Date().toLocaleString(),user:appState.currentUser?appState.currentUser.name:'Unknown'});
+    appState.fileHistory.unshift({id:Date.now(),name,size,type,originalName,date:new Date().toLocaleString(),dateObj:new Date(),user:appState.currentUser?appState.currentUser.name:'Unknown'});
 }
 function addActivityLog(action,filename) {
     appState.activityLog.unshift({action,filename,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),fullDate:new Date(),user:appState.currentUser?appState.currentUser.name:'Unknown'});
@@ -289,9 +277,8 @@ function showStatus(type,message,filename=null) {
 }
 function updateProgress(p) { progressFill.style.width=p+'%'; }
 
-// ═══════════════════════════════════════
-// FILES PAGE
-// ═══════════════════════════════════════
+// ── FILES PAGE ────────────────────────────────────────────────────────────────
+
 let activeFilter='all', searchQuery='';
 function renderFilesPage() {
     const grid=document.getElementById('filesGrid'), empty=document.getElementById('filesEmpty');
@@ -312,27 +299,176 @@ document.querySelectorAll('.filter-btn').forEach(btn=>{
 });
 document.getElementById('filesSearch').addEventListener('input',e=>{ searchQuery=e.target.value; renderFilesPage(); });
 
-// ═══════════════════════════════════════
-// ACTIVITY PAGE
-// ═══════════════════════════════════════
-function renderActivityPage() {
-    const enc=appState.fileHistory.filter(f=>f.type==='encrypted').length;
-    const dec=appState.fileHistory.filter(f=>f.type==='decrypted').length;
-    const total=appState.fileHistory.length;
-    const today=appState.fileHistory.filter(f=>new Date(f.date).toDateString()===new Date().toDateString()).length;
-    document.getElementById('statEncrypted').textContent=enc;
-    document.getElementById('statDecrypted').textContent=dec;
-    document.getElementById('statTotal').textContent=total;
-    document.getElementById('statToday').textContent=today;
-    const log=document.getElementById('activityLog');
-    if(appState.activityLog.length===0){ log.innerHTML='<div class="activity-empty">No activity yet. Start encrypting or decrypting files!</div>'; return; }
-    log.innerHTML=appState.activityLog.map(item=>'<div class="activity-item"><div class="activity-dot '+(item.action.includes('🔒')?'dot-encrypt':'dot-decrypt')+'">'+item.action.split(' ')[0]+'</div><div class="activity-info"><div class="activity-action">'+item.action+'</div><div class="activity-filename">'+item.filename+'</div></div><div class="activity-time">'+item.time+'</div></div>').join('');
-}
-document.getElementById('clearLogBtn').addEventListener('click',()=>{ appState.activityLog=[]; renderActivityPage(); });
+// ── CHART ─────────────────────────────────────────────────────────────────────
 
-// ═══════════════════════════════════════
-// TEAM PAGE
-// ═══════════════════════════════════════
+function drawActivityChart() {
+    const canvas = document.getElementById('activityChart');
+    if (!canvas) return;
+
+    const days  = parseInt(document.getElementById('chartRange').value) || 30;
+    const ctx   = canvas.getContext('2d');
+
+    // ── Build per-day buckets ──────────────────────────────────────────
+    const labels=[], encData=[], decData=[];
+    const now = new Date(); now.setHours(23,59,59,999);
+
+    for (let i = days-1; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const key = d.toISOString().slice(0,10);          // "YYYY-MM-DD"
+        labels.push(i === 0 ? 'Today' : key.slice(5));    // "MM-DD" or "Today"
+
+        const dayFiles = appState.fileHistory.filter(f => {
+            const fd = f.dateObj instanceof Date ? f.dateObj : new Date(f.date);
+            return fd.toISOString().slice(0,10) === key;
+        });
+        encData.push(dayFiles.filter(f => f.type==='encrypted').length);
+        decData.push(dayFiles.filter(f => f.type==='decrypted').length);
+    }
+
+    // ── HiDPI sizing ──────────────────────────────────────────────────
+    const dpr  = window.devicePixelRatio || 1;
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width  = rect.width  * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width  = rect.width  + 'px';
+    canvas.style.height = rect.height + 'px';
+    ctx.scale(dpr, dpr);
+
+    const W = rect.width, H = rect.height;
+    const padL=42, padR=18, padT=18, padB=34;
+    const cW = W - padL - padR;
+    const cH = H - padT - padB;
+    ctx.clearRect(0, 0, W, H);
+
+    // ── Y-axis scale ──────────────────────────────────────────────────
+    const maxVal  = Math.max(1, ...encData, ...decData);
+    const yStep   = Math.ceil(maxVal / 4) || 1;
+    const yMax    = yStep * 4;
+
+    // ── Grid lines + Y labels ─────────────────────────────────────────
+    ctx.strokeStyle = 'rgba(90,115,85,0.12)';
+    ctx.lineWidth   = 1;
+    ctx.font        = '10px DM Sans, sans-serif';
+    ctx.fillStyle   = 'rgba(90,115,85,0.55)';
+    ctx.textAlign   = 'right';
+    for (let i = 0; i <= 4; i++) {
+        const y = padT + cH * (1 - i/4);
+        ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL+cW, y); ctx.stroke();
+        ctx.fillText(yStep * i, padL - 6, y + 3.5);
+    }
+
+    // ── Bars ──────────────────────────────────────────────────────────
+    const n      = labels.length;
+    const groupW = cW / n;
+    const barW   = Math.max(4, Math.min(20, groupW * 0.32));
+    const gap    = 3;
+
+    labels.forEach((lbl, i) => {
+        const cx = padL + i * groupW + groupW / 2;
+
+        // Encrypted bar (green)
+        const eH = (encData[i] / yMax) * cH;
+        if (eH > 0) {
+            ctx.fillStyle = '#5a7355';
+            ctx.beginPath();
+            ctx.roundRect(cx - barW - gap/2, padT + cH - eH, barW, eH, [4,4,0,0]);
+            ctx.fill();
+        }
+
+        // Decrypted bar (terracotta)
+        const dH = (decData[i] / yMax) * cH;
+        if (dH > 0) {
+            ctx.fillStyle = '#d4a373';
+            ctx.beginPath();
+            ctx.roundRect(cx + gap/2, padT + cH - dH, barW, dH, [4,4,0,0]);
+            ctx.fill();
+        }
+
+        // Empty-day ghost bars so the chart feels full when no data yet
+        if (eH === 0) {
+            ctx.fillStyle = 'rgba(90,115,85,0.07)';
+            ctx.beginPath();
+            ctx.roundRect(cx - barW - gap/2, padT + cH - 4, barW, 4, [2,2,0,0]);
+            ctx.fill();
+        }
+        if (dH === 0) {
+            ctx.fillStyle = 'rgba(212,163,115,0.07)';
+            ctx.beginPath();
+            ctx.roundRect(cx + gap/2, padT + cH - 4, barW, 4, [2,2,0,0]);
+            ctx.fill();
+        }
+
+        // X labels — thin out if too many days
+        const showLabel = n <= 14 || i % Math.ceil(n/14) === 0 || i === n-1;
+        if (showLabel) {
+            ctx.fillStyle  = 'rgba(90,115,85,0.6)';
+            ctx.font       = '10px DM Sans, sans-serif';
+            ctx.textAlign  = 'center';
+            ctx.fillText(lbl, cx, padT + cH + 20);
+        }
+    });
+
+    // ── Baseline ─────────────────────────────────────────────────────
+    ctx.strokeStyle = 'rgba(90,115,85,0.25)';
+    ctx.lineWidth   = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(padL, padT + cH);
+    ctx.lineTo(padL + cW, padT + cH);
+    ctx.stroke();
+}
+
+// Re-draw when range selector changes
+document.getElementById('chartRange').addEventListener('change', drawActivityChart);
+
+// Re-draw on window resize so HiDPI stays correct
+window.addEventListener('resize', () => {
+    if (document.getElementById('page-activity').classList.contains('active-page')) {
+        drawActivityChart();
+    }
+});
+
+// ── ACTIVITY PAGE ─────────────────────────────────────────────────────────────
+
+function renderActivityPage() {
+    const enc   = appState.fileHistory.filter(f=>f.type==='encrypted').length;
+    const dec   = appState.fileHistory.filter(f=>f.type==='decrypted').length;
+    const total = appState.fileHistory.length;
+    const today = appState.fileHistory.filter(f=>{
+        const fd = f.dateObj instanceof Date ? f.dateObj : new Date(f.date);
+        return fd.toDateString() === new Date().toDateString();
+    }).length;
+    document.getElementById('statEncrypted').textContent = enc;
+    document.getElementById('statDecrypted').textContent = dec;
+    document.getElementById('statTotal').textContent     = total;
+    document.getElementById('statToday').textContent     = today;
+
+    // ── Draw chart ────────────────────────────────────────────────────
+    drawActivityChart();
+
+    // ── Activity log list ─────────────────────────────────────────────
+    const log = document.getElementById('activityLog');
+    if (appState.activityLog.length===0) {
+        log.innerHTML='<div class="activity-empty">No activity yet. Start encrypting or decrypting files!</div>';
+        return;
+    }
+    log.innerHTML = appState.activityLog.map(item =>
+        '<div class="activity-item">' +
+        '<div class="activity-dot '+(item.action.includes('🔒')?'dot-encrypt':'dot-decrypt')+'">'+item.action.split(' ')[0]+'</div>' +
+        '<div class="activity-info"><div class="activity-action">'+item.action+'</div><div class="activity-filename">'+item.filename+'</div></div>' +
+        '<div class="activity-time">'+item.time+'</div>' +
+        '</div>'
+    ).join('');
+}
+
+document.getElementById('clearLogBtn').addEventListener('click', () => {
+    appState.activityLog=[];
+    appState.fileHistory=[];
+    renderActivityPage();
+});
+
+// ── TEAM PAGE ─────────────────────────────────────────────────────────────────
+
 function renderTeamPage() {
     const user=appState.currentUser;
     if(!user||(user.role!=='manager'&&user.role!=='admin')) return;
@@ -353,9 +489,8 @@ function renderTeamPage() {
     teamLog.innerHTML=appState.activityLog.slice(0,20).map(item=>'<div class="activity-item"><div class="activity-dot '+(item.action.includes('🔒')?'dot-encrypt':'dot-decrypt')+'">'+item.action.split(' ')[0]+'</div><div class="activity-info"><div class="activity-action">'+item.action+' <span style="color:var(--sage);font-size:0.8rem">by '+item.user+'</span></div><div class="activity-filename">'+item.filename+'</div></div><div class="activity-time">'+item.time+'</div></div>').join('');
 }
 
-// ═══════════════════════════════════════
-// ADMIN PAGE
-// ═══════════════════════════════════════
+// ── ADMIN PAGE ────────────────────────────────────────────────────────────────
+
 function renderAdminPage() {
     const user=appState.currentUser;
     if(!user||user.role!=='admin') return;
@@ -404,9 +539,6 @@ function renderAdminPage() {
 }
 document.getElementById('clearSystemLogBtn').addEventListener('click',()=>{ appState.systemLog=[]; renderAdminPage(); });
 
-// ═══════════════════════════════════════
-// ADD USER MODAL
-// ═══════════════════════════════════════
 const addUserModal=document.getElementById('addUserModal');
 document.getElementById('addUserBtn').addEventListener('click',()=>{
     addUserModal.classList.add('visible');
@@ -436,9 +568,8 @@ document.getElementById('confirmAddUserBtn').addEventListener('click',()=>{
     renderAdminPage();
 });
 
-// ═══════════════════════════════════════
-// SETTINGS PAGE
-// ═══════════════════════════════════════
+// ── SETTINGS PAGE ─────────────────────────────────────────────────────────────
+
 function loadSettingsPage() {
     const user=appState.currentUser;
     if(user){
