@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/styles.css">
+
 </head>
 <body>
 
@@ -33,7 +34,7 @@
         </div>
         <div class="login-options">
             <label><input type="checkbox" id="rememberMe"> Remember me</label>
-            <a href="#">Forgot password?</a>
+     
         </div>
         <button class="btn-login" id="loginBtn">Sign In</button>
         <div class="demo-accounts">
@@ -85,13 +86,12 @@
         <ul class="nav-links">
             <li><a href="#" class="active" data-page="dashboard">⊞ &nbsp;Dashboard</a></li>
             <li><a href="#" data-page="files">📄 &nbsp;My Files</a></li>
-            <li><a href="#" data-page="activity">📊 &nbsp;Activity</a></li>
+            <li><a href="#" data-page="activity" class="nav-item-admin">📊 &nbsp;Activity</a></li>
             <li class="nav-item-manager" style="display:none"><a href="#" data-page="team">👥 &nbsp;Team</a></li>
             <li class="nav-item-admin"   style="display:none"><a href="#" data-page="admin">🛡 &nbsp;Admin</a></li>
             <li><a href="#" data-page="settings">⚙️ &nbsp;Settings</a></li>
         </ul>
         <div class="nav-right">
-            <span class="nav-badge" id="navRoleBadge">Pro</span>
             <div class="nav-avatar" tabindex="0" id="navAvatar">
                 <span id="avatarInitials">--</span>
                 <div class="avatar-dropdown">
@@ -179,23 +179,40 @@
             <div id="dashAdminSection" style="display:none;">
                 <div class="dash-section-title">🛡 Admin Overview</div>
                 <div class="activity-stats-row mb-32">
-                    <div class="stat-card"><div class="stat-icon">👤</div><div class="stat-value" id="dashAdmUsers">—</div><div class="stat-label">Total Users</div></div>
-                    <div class="stat-card"><div class="stat-icon">🛡</div><div class="stat-value" id="dashAdmAdmins">—</div><div class="stat-label">Admins</div></div>
-                    <div class="stat-card"><div class="stat-icon">👔</div><div class="stat-value" id="dashAdmManagers">—</div><div class="stat-label">Managers</div></div>
-                    <div class="stat-card"><div class="stat-icon">🔐</div><div class="stat-value" id="dashAdmOps">—</div><div class="stat-label">Total Operations</div></div>
-                </div>
-                <div class="activity-stats-row mb-32">
-                    <div class="activity-card" style="flex:1">
-                        <div class="activity-card-header"><span class="activity-card-title">👤 &nbsp;Recent Users</span><a href="#" class="dash-view-all" onclick="switchPage('admin');return false;">Manage Users →</a></div>
-                        <div id="dashAdmUserList"></div>
-                    </div>
-                    <div class="activity-card" style="flex:1">
-                        <div class="activity-card-header"><span class="activity-card-title">🖥 &nbsp;Recent System Events</span><a href="#" class="dash-view-all" onclick="switchPage('activity');return false;">Full Log →</a></div>
-                        <div id="dashAdmRecentLog" class="activity-log"></div>
-                    </div>
+                <div class="activity-card" style="flex:1">
+                    <div class="activity-card-header"><span class="activity-card-title">👤 &nbsp;Recent Users</span><a href="#" class="dash-view-all" onclick="switchPage('admin');return false;">Manage Users →</a></div>
+                <div id="dashAdmUserList"></div>
+             </div>
+            <div class="activity-card" style="flex:1">
+                <div class="activity-card-header"><span class="activity-card-title">🖥 &nbsp;Recent System Events</span><a href="#" class="dash-view-all" onclick="switchPage('activity');return false;">Full Log →</a></div>
+                    <div id="dashAdmRecentLog" class="activity-log"></div>
                 </div>
             </div>
 
+        <!-- Analytics Charts Row -->
+            <div class="dash-section-title">📊 Analytics</div>
+                <div class="activity-stats-row mb-32">
+                <div class="activity-card" style="flex:1.2">
+                    <div class="activity-card-header"><span class="activity-card-title">🔒 Operations Over Time</span></div>
+                    <canvas id="chartOpsOverTime" height="180"></canvas>
+                </div>
+                <div class="activity-card" style="flex:0.8">
+                    <div class="activity-card-header"><span class="activity-card-title">👥 Users by Role</span></div>
+                    <canvas id="chartUsersByRole" height="180"></canvas>
+                    </div>
+                </div>
+                <div class="activity-stats-row mb-32">
+                <div class="activity-card" style="flex:1">
+                    <div class="activity-card-header"><span class="activity-card-title">🌐 Top Pages Visited</span></div>
+                    <canvas id="chartTopPages" height="160"></canvas>
+                </div>
+                <div class="activity-card" style="flex:1">
+                    <div class="activity-card-header"><span class="activity-card-title">🖥 Browser Distribution</span></div>
+                    <canvas id="chartBrowsers" height="160"></canvas>
+                </div>
+            </div>
+
+            </div>
         </div>
     </div>
 
@@ -237,8 +254,11 @@
             <div class="activity-card">
                 <div class="activity-card-header">
                     <span class="activity-card-title">📋 &nbsp;Activity Log</span>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                    <button class="btn-export-csv" id="exportCsvBtn">⬇ Export CSV</button>
                     <button class="btn-clear-log" id="clearLogBtn">Clear Log</button>
                 </div>
+            </div>
                 <div class="activity-table-wrap">
                     <table id="activityDataTable" class="activity-dt-table" style="width:100%">
                         <thead>
@@ -378,7 +398,7 @@
 <!-- jQuery + DataTables -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <!-- Inject BASE_URL so script.js builds the correct API path -->
 <script>
     const APP_BASE_URL = '<?= BASE_URL ?>';
