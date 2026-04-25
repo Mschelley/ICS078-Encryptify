@@ -279,17 +279,17 @@ async function renderDashboard() {
     const role = user.role;
 
     // Show/hide sections based on role
-    document.getElementById('dashUserSection').style.display    = 'block'; // all roles see encrypt/decrypt
-    document.getElementById('dashManagerSection').style.display = (role === 'manager') ? 'block' : 'none';
-    document.getElementById('dashAdminSection').style.display   = (role === 'admin')   ? 'block' : 'none';
+    document.getElementById('dashUserSection').style.display    = role === 'user'    ? 'block' : 'none';
+    document.getElementById('dashManagerSection').style.display = role === 'manager' ? 'block' : 'none';
+    document.getElementById('dashAdminSection').style.display   = role === 'admin'   ? 'block' : 'none';
 
     if (role === 'manager') {
         const data = await api({ action: 'get_users' });
         const users = data.users || [];
-        document.getElementById('dashMgrMembers').textContent  = users.length;
+        document.getElementById('dashMgrMembers').textContent   = users.length;
         document.getElementById('dashMgrEncrypted').textContent = appState.fileHistory.filter(f=>f.type==='encrypted').length;
         document.getElementById('dashMgrDecrypted').textContent = appState.fileHistory.filter(f=>f.type==='decrypted').length;
-        document.getElementById('dashMgrActive').textContent   = users.filter(u=>u.status==='active').length;
+        document.getElementById('dashMgrActive').textContent    = users.filter(u=>u.status==='active').length;
 
         const list = document.getElementById('dashMgrTeamList');
         list.innerHTML = users.slice(0,5).map(u => {
@@ -306,7 +306,7 @@ async function renderDashboard() {
         ]);
         const users = usersData.users || [];
         const logs  = logsData.logs   || [];
-        const totalOps = users.reduce((s,u) => s+(u.ops||0), 0);
+        const totalOps = users.reduce((s,u) => s+(parseInt(u.ops)||0), 0);
 
         document.getElementById('dashAdmUsers').textContent    = users.length;
         document.getElementById('dashAdmAdmins').textContent   = users.filter(u=>u.role==='admin').length;
