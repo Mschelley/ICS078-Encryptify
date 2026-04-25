@@ -458,3 +458,125 @@ nav { position: sticky; top: 0; z-index: 50; display: flex; align-items: center;
 
 /* Add-user modal confirm button */
 #confirmAddUserBtn { margin-top: 8px; }
+
+/* ═══════════════════════════════════════
+   FILE REMOVE BUTTON (X)
+═══════════════════════════════════════ */
+.file-remove-btn {
+    margin-left: auto;
+    background: rgba(212,100,80,0.12);
+    border: 1px solid rgba(212,100,80,0.3);
+    color: #c0503a;
+    border-radius: 50%;
+    width: 28px; height: 28px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s, transform 0.15s;
+}
+.file-remove-btn:hover { background: rgba(212,100,80,0.25); transform: scale(1.12); }
+
+/* ═══════════════════════════════════════
+   ROLE-BASED DASHBOARD SECTIONS
+═══════════════════════════════════════ */
+.dash-section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--deep-green);
+    margin: 48px 0 22px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(156,175,136,0.25);
+}
+.dash-view-all {
+    font-size: 0.85rem;
+    color: var(--forest);
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    transition: color 0.2s;
+}
+.dash-view-all:hover { color: var(--terracotta); }
+.mb-32 { margin-bottom: 32px; }
+.mt-24 { margin-top: 24px; }
+.activity-stats-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
+.activity-stats-row .activity-card { flex: 1; min-width: 280px; }
+
+/* ═══════════════════════════════════════
+   ACTIVITY DATATABLE OVERRIDES
+═══════════════════════════════════════ */
+.activity-table-wrap { overflow-x: auto; padding: 4px 0; }
+
+table.activity-dt-table {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.87rem;
+    color: var(--deep-green);
+    border-collapse: collapse;
+    width: 100% !important;
+}
+table.activity-dt-table thead th {
+    background: linear-gradient(135deg, rgba(156,175,136,0.18), rgba(212,163,115,0.1));
+    color: var(--forest);
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 0.5px;
+    padding: 12px 14px;
+    border-bottom: 2px solid rgba(156,175,136,0.35);
+    white-space: nowrap;
+}
+table.activity-dt-table tbody tr {
+    border-bottom: 1px solid rgba(156,175,136,0.12);
+    transition: background 0.18s;
+}
+table.activity-dt-table tbody tr:hover { background: rgba(156,175,136,0.07); }
+table.activity-dt-table tbody td { padding: 10px 14px; vertical-align: middle; }
+table.activity-dt-table.dataTable tbody td { border: none; }
+
+/* DataTables pagination & search themed */
+.dataTables_wrapper .dataTables_filter input {
+    background: rgba(255,254,249,0.9);
+    border: 1.5px solid rgba(156,175,136,0.4);
+    border-radius: 10px;
+    padding: 6px 12px;
+    color: var(--deep-green);
+    font-family: 'DM Sans', sans-serif;
+    margin-left: 8px;
+}
+.dataTables_wrapper .dataTables_filter input:focus {
+    outline: none;
+    border-color: var(--sage);
+    box-shadow: 0 0 0 3px rgba(156,175,136,0.15);
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    border-radius: 8px !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.83rem !important;
+    color: var(--forest) !important;
+    border: none !important;
+    padding: 4px 10px !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background: var(--sage) !important;
+    color: white !important;
+    border: none !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: rgba(156,175,136,0.15) !important;
+    color: var(--forest) !important;
+}
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.83rem;
+    color: var(--earth);
+    margin-bottom: 10px;
+}
+.dataTables_wrapper .dataTables_length select {
+    border: 1.5px solid rgba(156,175,136,0.4);
+    border-radius: 8px;
+    padding: 4px 8px;
+    color: var(--deep-green);
+    font-family: 'DM Sans', sans-serif;
+}
