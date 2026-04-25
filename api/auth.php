@@ -58,7 +58,7 @@ switch ($action) {
             respond(['error' => 'Invalid email or password.']);
         }
 
-        // All passwords in the DB are bcrypt ($2y$10$...).
+        // All passwords in the DB are bcrypt.
         // Demo accounts were seeded with pre-generated verified hashes.
         // New registrations are hashed at sign-up time.
         if (!password_verify($password, $user['password'])) {
