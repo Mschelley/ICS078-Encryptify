@@ -38,6 +38,9 @@ CREATE TABLE IF NOT EXISTS system_logs (
     id          INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
     user_id     INT UNSIGNED    NULL,
     message     TEXT            NOT NULL,
+    ip_address  VARCHAR(45)     NULL,
+    browser     VARCHAR(255)    NULL,
+    page        VARCHAR(100)    NULL,
     created_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_sl_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -76,3 +79,11 @@ INSERT IGNORE INTO user_settings (user_id)
         'manager@encryptify.app',
         'admin@encryptify.app'
     );
+
+-- ══════════════════════════════════════════════════════
+--  MIGRATION: Add ip_address, browser, page to system_logs
+--  Run this if upgrading an existing installation:
+-- ══════════════════════════════════════════════════════
+-- ALTER TABLE system_logs ADD COLUMN ip_address VARCHAR(45) NULL AFTER message;
+-- ALTER TABLE system_logs ADD COLUMN browser    VARCHAR(255) NULL AFTER ip_address;
+-- ALTER TABLE system_logs ADD COLUMN page       VARCHAR(100) NULL AFTER browser;
