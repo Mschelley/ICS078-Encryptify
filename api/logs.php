@@ -10,48 +10,36 @@ switch ($action) {
     // LOG A PAGE VISIT (any authenticated user)
     // ════════════════════════
     case 'log_page_visit':
-        $user = requireSession();
-        $page = trim($_POST['page'] ?? 'unknown');
-        $page = substr(preg_replace('/[^a-z0-9_\-]/', '', strtolower($page)), 0, 60);
-        writeSystemLog(
-            getDB(),
-            $user['id'],
-            'Page visited: ' . $page . ' by ' . $user['name'] . ' [' . $user['role'] . ']',
-            $page
-        );
-        respond(['success' => true]);
-        break;
+    $user = requireSession();
+    $page = trim($_POST['page'] ?? 'unknown');
+    $url  = trim($_POST['url']  ?? '');
+    $page = substr(preg_replace('/[^a-z0-9_\-]/', '', strtolower($page)), 0, 60);
+    $url  = substr(filter_var($url, FILTER_SANITIZE_URL), 0, 255);
+    writeSystemLog(getDB(), $user['id'],
+        'Page visited: ' . $page . ' by ' . $user['name'] . ' [' . $user['role'] . ']',
+        $url ?: $page
+    );
+    respond(['success' => true]);
+    break;
 
     // ════════════════════════
     // FETCH FULL ACTIVITY LOG for Activity page (all authenticated users)
     // Returns own logs for regular users; all logs for manager/admin
     // ════════════════════════
     case 'get_activity_logs':
-        $user = requireSession();
-        $pdo  = getDB();
+    requireRole('admin');
 
-        if ($user['role'] === 'admin' || $user['role'] === 'manager') {
-            $stmt = $pdo->prepare(
-                'SELECT sl.id, sl.message, sl.ip_address, sl.browser, sl.page, sl.created_at,
-                        CONCAT(u.first_name, " ", u.last_name) AS user_name, u.role AS user_role
-                 FROM system_logs sl
-                 LEFT JOIN users u ON u.id = sl.user_id
-                 ORDER BY sl.created_at DESC
-                 LIMIT 500'
-            );
-            $stmt->execute();
-        } else {
-            $stmt = $pdo->prepare(
-                'SELECT sl.id, sl.message, sl.ip_address, sl.browser, sl.page, sl.created_at,
-                        CONCAT(u.first_name, " ", u.last_name) AS user_name, u.role AS user_role
-                 FROM system_logs sl
-                 LEFT JOIN users u ON u.id = sl.user_id
-                 WHERE sl.user_id = ?
-                 ORDER BY sl.created_at DESC
-                 LIMIT 500'
-            );
-            $stmt->execute([$user['id']]);
-        }
+    $stmt = getDB()->prepare(
+        'SELECT sl.id, sl.message, sl.ip_address, sl.browser, sl.page, sl.created_at,
+                CONCAT(u.first_name, " ", u.last_name) AS user_name, u.role AS user_role
+         FROM system_logs sl
+         LEFT JOIN users u ON u.id = sl.user_id
+         ORDER BY sl.created_at DESC
+         LIMIT 500'
+    );
+    $stmt->execute();
+    respond(['logs' => $stmt->fetchAll()]);
+    break;
 
         respond(['logs' => $stmt->fetchAll()]);
         break;
