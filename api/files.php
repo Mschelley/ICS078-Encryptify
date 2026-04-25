@@ -23,6 +23,14 @@ switch ($action) {
             'INSERT INTO file_logs (user_id, action, file_name, file_size) VALUES (?, ?, ?, ?)'
         )->execute([$user['id'], $actionType, $fileName, $fileSize]);
 
+        // Also write to system_logs so Activity page captures IP + browser
+        writeSystemLog(
+            getDB(),
+            $user['id'],
+            'File ' . $actionType . ': ' . $fileName,
+            'dashboard'
+        );
+
         respond(['success' => true]);
         break;
 
