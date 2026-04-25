@@ -1,14 +1,16 @@
 <?php
+
+session_start();
+error_reporting(0);
+ini_set('display_errors', '0');
+header('Content-Type: application/json');
+
+require_once __DIR__ . '/../config/db.php';   
 // ══════════════════════════════════════════════════════════
 //  ENCRYPTIFY — API Router  (api/router.php)
 //  Entry point for all fetch() calls from assets/js/script.js
 //  Dispatches to the correct handler based on $action.
 // ══════════════════════════════════════════════════════════
-session_start();
-header('Content-Type: application/json');
-
-require_once __DIR__ . '/../config/db.php';
-
 // ── Shared helpers — available to every included handler ──
 function respond(array $data, int $code = 200): void {
     http_response_code($code);
@@ -32,11 +34,15 @@ function requireRole(string ...$roles): void {
 
 // ── Get real client IP ─────────────────────────────────────
 function getClientIP(): string {
-    $headers = ['HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', 'REMOTE_ADDR'];
+    $headers = ['HTTP_CF_CONNECTING_IP','HTTP_X_FORWARDED_FOR','HTTP_X_REAL_IP','REMOTE_ADDR'];
     foreach ($headers as $h) {
         if (!empty($_SERVER[$h])) {
             $ip = trim(explode(',', $_SERVER[$h])[0]);
-            if (filter_var($ip, FILTER_VALIDATE_IP)) return $ip;
+            if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                // Normalize IPv6 loopback to readable form
+                if ($ip === '::1') return '127.0.0.1 (localhost)';
+                return $ip;
+            }
         }
     }
     return '0.0.0.0';
@@ -54,10 +60,11 @@ function parseBrowser(): string {
 }
 
 // ── Shared log helper (used by auth.php & the route below) ─
-function writeSystemLog(PDO $pdo, ?int $userId, string $message, string $page = ''): void {
+function writeSystemLog(PDO $pdo, ?int $userId, string $message, string $page = '', string $url = ''): void {
+    $pageRecord = $url ?: $page;
     $pdo->prepare(
         'INSERT INTO system_logs (user_id, message, ip_address, browser, page) VALUES (?, ?, ?, ?, ?)'
-    )->execute([$userId, $message, getClientIP(), parseBrowser(), $page]);
+    )->execute([$userId, $message, getClientIP(), parseBrowser(), $pageRecord]);
 }
 
 // ── Dispatch ──────────────────────────────────────────────
@@ -87,10 +94,12 @@ $routes = [
     'save_settings'     => 'settings.php',
 ];
 
-if (!$action || !isset($routes[$action])) {
-    respond(['error' => 'Unknown action: ' . htmlspecialchars($action)], 400);
+if (!isset($routes[$action])) {
+    respond(['error' => 'Unknown action.'], 404);
 }
 
-require __DIR__ . '/' . $routes[$action];
-
-respond(['error' => 'Handler did not return a response.'], 500);
+try {
+    include __DIR__ . '/' . $routes[$action];
+} catch (Throwable $e) {
+    respond(['error' => 'Server error: ' . $e->getMessage()], 500);
+}
