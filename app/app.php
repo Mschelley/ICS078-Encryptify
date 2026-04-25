@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Encryptify - PDF Protection</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/styles.css">
 </head>
 <body>
@@ -109,49 +110,92 @@
     <div id="page-dashboard" class="page-view active-page">
         <div class="container">
             <header><h1 class="logo-text">Encryptify</h1><p class="tagline">PDF Protection</p></header>
-            <div class="main-container">
-                <div class="card">
-                    <div class="card-header"><span class="card-icon">🔒</span><h2 class="card-title">Encrypt</h2></div>
-                    <div class="upload-area" id="encryptUpload">
-                        <div class="upload-icon">📄</div>
-                        <div class="upload-text">Drop your PDF here</div>
-                        <div class="upload-hint">or click to browse</div>
-                        <input type="file" id="encryptFile" accept=".pdf">
+
+            <!-- ── USER DASHBOARD (all roles see encrypt/decrypt) ── -->
+            <div id="dashUserSection">
+                <div class="main-container">
+                    <div class="card">
+                        <div class="card-header"><span class="card-icon">🔒</span><h2 class="card-title">Encrypt</h2></div>
+                        <div class="upload-area" id="encryptUpload">
+                            <div class="upload-icon">📄</div>
+                            <div class="upload-text">Drop your PDF here</div>
+                            <div class="upload-hint">or click to browse</div>
+                            <input type="file" id="encryptFile" accept=".pdf">
+                        </div>
+                        <div class="file-display" id="encryptFileDisplay">
+                            <div class="file-icon">📄</div>
+                            <div class="file-info"><div class="file-name" id="encryptFileName"></div><div class="file-size" id="encryptFileSize"></div></div>
+                            <button class="file-remove-btn" id="encryptRemoveBtn" title="Remove file">✕</button>
+                        </div>
+                        <div class="input-group">
+                            <label for="encryptPassword">Protection Password</label>
+                            <input type="password" id="encryptPassword" placeholder="Enter password...">
+                            <div class="password-strength" id="encryptStrength"></div>
+                        </div>
+                        <button class="btn btn-encrypt" id="encryptBtn" disabled>Protect PDF</button>
                     </div>
-                    <div class="file-display" id="encryptFileDisplay">
-                        <div class="file-icon">📄</div>
-                        <div class="file-info"><div class="file-name" id="encryptFileName"></div><div class="file-size" id="encryptFileSize"></div></div>
+                    <div class="card">
+                        <div class="card-header"><span class="card-icon">🔓</span><h2 class="card-title">Decrypt</h2></div>
+                        <div class="upload-area" id="decryptUpload">
+                            <div class="upload-icon">🔐</div>
+                            <div class="upload-text">Drop encrypted PDF</div>
+                            <div class="upload-hint">or click to browse</div>
+                            <input type="file" id="decryptFile" accept=".pdf">
+                        </div>
+                        <div class="file-display" id="decryptFileDisplay">
+                            <div class="file-icon">🔐</div>
+                            <div class="file-info"><div class="file-name" id="decryptFileName"></div><div class="file-size" id="decryptFileSize"></div></div>
+                            <button class="file-remove-btn" id="decryptRemoveBtn" title="Remove file">✕</button>
+                        </div>
+                        <div class="input-group">
+                            <label for="decryptPassword">Enter Password</label>
+                            <input type="password" id="decryptPassword" placeholder="Enter password...">
+                        </div>
+                        <button class="btn btn-decrypt" id="decryptBtn" disabled>Unlock PDF</button>
                     </div>
-                    <div class="input-group">
-                        <label for="encryptPassword">Protection Password</label>
-                        <input type="password" id="encryptPassword" placeholder="Enter password...">
-                        <div class="password-strength" id="encryptStrength"></div>
-                    </div>
-                    <button class="btn btn-encrypt" id="encryptBtn" disabled>Protect PDF</button>
                 </div>
-                <div class="card">
-                    <div class="card-header"><span class="card-icon">🔓</span><h2 class="card-title">Decrypt</h2></div>
-                    <div class="upload-area" id="decryptUpload">
-                        <div class="upload-icon">🔐</div>
-                        <div class="upload-text">Drop encrypted PDF</div>
-                        <div class="upload-hint">or click to browse</div>
-                        <input type="file" id="decryptFile" accept=".pdf">
-                    </div>
-                    <div class="file-display" id="decryptFileDisplay">
-                        <div class="file-icon">🔐</div>
-                        <div class="file-info"><div class="file-name" id="decryptFileName"></div><div class="file-size" id="decryptFileSize"></div></div>
-                    </div>
-                    <div class="input-group">
-                        <label for="decryptPassword">Enter Password</label>
-                        <input type="password" id="decryptPassword" placeholder="Enter password...">
-                    </div>
-                    <button class="btn btn-decrypt" id="decryptBtn" disabled>Unlock PDF</button>
+                <div class="status-container" id="statusContainer">
+                    <div class="status-text">Upload a PDF to begin your journey</div>
+                    <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
                 </div>
             </div>
-            <div class="status-container" id="statusContainer">
-                <div class="status-text">Upload a PDF to begin your journey</div>
-                <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+
+            <!-- ── MANAGER DASHBOARD EXTRAS ── -->
+            <div id="dashManagerSection" style="display:none;">
+                <div class="dash-section-title">👔 Manager Overview</div>
+                <div class="activity-stats-row mb-32">
+                    <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="dashMgrMembers">—</div><div class="stat-label">Team Members</div></div>
+                    <div class="stat-card"><div class="stat-icon">🔒</div><div class="stat-value" id="dashMgrEncrypted">—</div><div class="stat-label">Team Encrypted</div></div>
+                    <div class="stat-card"><div class="stat-icon">🔓</div><div class="stat-value" id="dashMgrDecrypted">—</div><div class="stat-label">Team Decrypted</div></div>
+                    <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-value" id="dashMgrActive">—</div><div class="stat-label">Active Members</div></div>
+                </div>
+                <div class="activity-card">
+                    <div class="activity-card-header"><span class="activity-card-title">👥 &nbsp;Team Quick View</span><a href="#" class="dash-view-all" onclick="switchPage('team');return false;">View Full Team →</a></div>
+                    <div id="dashMgrTeamList" class="team-members-list"></div>
+                </div>
             </div>
+
+            <!-- ── ADMIN DASHBOARD EXTRAS ── -->
+            <div id="dashAdminSection" style="display:none;">
+                <div class="dash-section-title">🛡 Admin Overview</div>
+                <div class="activity-stats-row mb-32">
+                    <div class="stat-card"><div class="stat-icon">👤</div><div class="stat-value" id="dashAdmUsers">—</div><div class="stat-label">Total Users</div></div>
+                    <div class="stat-card"><div class="stat-icon">🛡</div><div class="stat-value" id="dashAdmAdmins">—</div><div class="stat-label">Admins</div></div>
+                    <div class="stat-card"><div class="stat-icon">👔</div><div class="stat-value" id="dashAdmManagers">—</div><div class="stat-label">Managers</div></div>
+                    <div class="stat-card"><div class="stat-icon">🔐</div><div class="stat-value" id="dashAdmOps">—</div><div class="stat-label">Total Operations</div></div>
+                </div>
+                <div class="activity-stats-row mb-32">
+                    <div class="activity-card" style="flex:1">
+                        <div class="activity-card-header"><span class="activity-card-title">👤 &nbsp;Recent Users</span><a href="#" class="dash-view-all" onclick="switchPage('admin');return false;">Manage Users →</a></div>
+                        <div id="dashAdmUserList"></div>
+                    </div>
+                    <div class="activity-card" style="flex:1">
+                        <div class="activity-card-header"><span class="activity-card-title">🖥 &nbsp;Recent System Events</span><a href="#" class="dash-view-all" onclick="switchPage('activity');return false;">Full Log →</a></div>
+                        <div id="dashAdmRecentLog" class="activity-log"></div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -192,10 +236,24 @@
             </div>
             <div class="activity-card">
                 <div class="activity-card-header">
-                    <span class="activity-card-title">📋 &nbsp;Recent Actions</span>
+                    <span class="activity-card-title">📋 &nbsp;Activity Log</span>
                     <button class="btn-clear-log" id="clearLogBtn">Clear Log</button>
                 </div>
-                <div class="activity-log" id="activityLog"><div class="activity-empty">No activity yet. Start encrypting or decrypting files!</div></div>
+                <div class="activity-table-wrap">
+                    <table id="activityDataTable" class="activity-dt-table" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Date &amp; Time</th>
+                                <th>User</th>
+                                <th>Action / Message</th>
+                                <th>Page</th>
+                                <th>IP Address</th>
+                                <th>Browser</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activityDtBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -317,6 +375,9 @@
 
 <!-- CryptoJS — client-side PDF encrypt/decrypt -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<!-- jQuery + DataTables -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 
 <!-- Inject BASE_URL so script.js builds the correct API path -->
 <script>
