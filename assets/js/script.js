@@ -24,8 +24,6 @@ const appState = {
 
 // ═══════════════════════════════════════
 // API HELPER
-// APP_BASE_URL is injected by app/index.php as a <script> block.
-// All fetch calls go to:  /encryptify/api/index.php
 // ═══════════════════════════════════════
 const API_URL = (typeof APP_BASE_URL !== 'undefined' ? APP_BASE_URL : '') + '/api/router.php';
 
@@ -43,6 +41,8 @@ function switchPage(page) {
     if (user) {
         const allowed = ROLE_PAGES[user.role] || ROLE_PAGES.user;
         if (!allowed.includes(page)) { showSettingsToast('🚫 Access denied: insufficient permissions.'); return; }
+        // Log page visit
+        api({ action: 'log_page_visit', page });
     }
     document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active-page'));
     document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
@@ -50,6 +50,7 @@ function switchPage(page) {
     if (target) target.classList.add('active-page');
     const link = document.querySelector('.nav-links a[data-page="' + page + '"]');
     if (link) link.classList.add('active');
+    if (page === 'dashboard') renderDashboard();
     if (page === 'files')    renderFilesPage();
     if (page === 'activity') renderActivityPage();
     if (page === 'settings') loadSettingsPage();
@@ -199,6 +200,10 @@ document.getElementById('logoutBtn').addEventListener('click', async e => {
     appState.currentUser = null;
     appState.fileHistory = [];
     appState.activityLog = [];
+    // Destroy DataTable if it exists
+    if ($.fn.DataTable.isDataTable('#activityDataTable')) {
+        $('#activityDataTable').DataTable().destroy();
+    }
     loginScreen.classList.remove('hidden');
     document.getElementById('loginEmail').value    = '';
     document.getElementById('loginPassword').value = '';
@@ -232,7 +237,64 @@ async function loadFileHistory() {
 }
 
 // ═══════════════════════════════════════
-// DASHBOARD — encrypt / decrypt (client-side, unchanged)
+// ROLE-BASED DASHBOARD
+// ═══════════════════════════════════════
+async function renderDashboard() {
+    const user = appState.currentUser;
+    if (!user) return;
+    const role = user.role;
+
+    // Show/hide sections based on role
+    document.getElementById('dashUserSection').style.display    = 'block'; // all roles see encrypt/decrypt
+    document.getElementById('dashManagerSection').style.display = (role === 'manager') ? 'block' : 'none';
+    document.getElementById('dashAdminSection').style.display   = (role === 'admin')   ? 'block' : 'none';
+
+    if (role === 'manager') {
+        const data = await api({ action: 'get_users' });
+        const users = data.users || [];
+        document.getElementById('dashMgrMembers').textContent  = users.length;
+        document.getElementById('dashMgrEncrypted').textContent = appState.fileHistory.filter(f=>f.type==='encrypted').length;
+        document.getElementById('dashMgrDecrypted').textContent = appState.fileHistory.filter(f=>f.type==='decrypted').length;
+        document.getElementById('dashMgrActive').textContent   = users.filter(u=>u.status==='active').length;
+
+        const list = document.getElementById('dashMgrTeamList');
+        list.innerHTML = users.slice(0,5).map(u => {
+            const r = ROLES[u.role] || ROLES.user;
+            const initials = (u.first_name[0]+(u.last_name[0]||'')).toUpperCase();
+            return '<div class="team-member-row"><div class="team-member-avatar" style="background:'+r.color+'22"><span style="color:'+r.color+';font-weight:700;font-size:0.85rem">'+initials+'</span></div><div class="team-member-info"><div class="team-member-name">'+u.first_name+' '+u.last_name+'</div><div class="team-member-email">'+u.email+'</div></div><span class="team-role-pill role-pill-'+u.role+'">'+r.icon+' '+r.label+'</span><span class="team-status-pill status-'+u.status+'">'+(u.status==='active'?'● Active':'○ Suspended')+'</span></div>';
+        }).join('');
+    }
+
+    if (role === 'admin') {
+        const [usersData, logsData] = await Promise.all([
+            api({ action: 'get_users' }),
+            api({ action: 'get_activity_logs' }),
+        ]);
+        const users = usersData.users || [];
+        const logs  = logsData.logs   || [];
+        const totalOps = users.reduce((s,u) => s+(u.ops||0), 0);
+
+        document.getElementById('dashAdmUsers').textContent    = users.length;
+        document.getElementById('dashAdmAdmins').textContent   = users.filter(u=>u.role==='admin').length;
+        document.getElementById('dashAdmManagers').textContent = users.filter(u=>u.role==='manager').length;
+        document.getElementById('dashAdmOps').textContent      = totalOps;
+
+        document.getElementById('dashAdmUserList').innerHTML = users.slice(0,5).map(u => {
+            const r = ROLES[u.role] || ROLES.user;
+            const initials = (u.first_name[0]+(u.last_name[0]||'')).toUpperCase();
+            return '<div class="team-member-row"><div class="team-member-avatar" style="background:'+r.color+'22;color:'+r.color+'">'+initials+'</div><div class="team-member-info"><div class="team-member-name">'+u.first_name+' '+u.last_name+'</div><div class="team-member-email">'+u.email+'</div></div><span class="team-role-pill role-pill-'+u.role+'">'+r.icon+' '+r.label+'</span></div>';
+        }).join('');
+
+        const logEl = document.getElementById('dashAdmRecentLog');
+        logEl.innerHTML = logs.slice(0,5).map(item => {
+            const t = new Date(item.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+            return '<div class="activity-item"><div class="activity-dot" style="background:rgba(123,45,138,0.1)">🖥</div><div class="activity-info"><div class="activity-action" style="color:var(--deep-green)">'+escHtml(item.message)+'</div><div class="activity-filename" style="color:var(--earth);font-size:0.78rem">'+(item.ip_address||'')+(item.browser?' · '+item.browser:'')+'</div></div><div class="activity-time">'+t+'</div></div>';
+        }).join('') || '<div class="activity-empty">No events yet.</div>';
+    }
+}
+
+// ═══════════════════════════════════════
+// DASHBOARD — encrypt / decrypt (client-side)
 // ═══════════════════════════════════════
 let encryptFileData=null, decryptFileData=null;
 
@@ -266,6 +328,28 @@ decryptUpload.addEventListener('dragover', e  => { e.preventDefault(); decryptUp
 decryptUpload.addEventListener('dragleave',()  => decryptUpload.classList.remove('dragover'));
 decryptUpload.addEventListener('drop',     e  => { e.preventDefault(); decryptUpload.classList.remove('dragover'); if(e.dataTransfer.files.length>0) handleDecryptFile(e.dataTransfer.files[0]); });
 decryptFileInput.addEventListener('change',e  => { if(e.target.files.length>0) handleDecryptFile(e.target.files[0]); });
+
+// ── X (remove) buttons ──────────────────────────────────
+document.getElementById('encryptRemoveBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    encryptFileData = null;
+    encryptFileInput.value = '';
+    encryptFileDisplay.classList.remove('active');
+    encryptBtn.disabled = true;
+    encryptStrength.textContent = '';
+    encryptPasswordEl.value = '';
+    showStatus('success', '✓ File removed');
+});
+
+document.getElementById('decryptRemoveBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    decryptFileData = null;
+    decryptFileInput.value = '';
+    decryptFileDisplay.classList.remove('active');
+    decryptBtn.disabled = true;
+    decryptPasswordEl.value = '';
+    showStatus('success', '✓ File removed');
+});
 
 encryptPasswordEl.addEventListener('input', () => {
     if (!appState.settings.showStrength) { encryptStrength.textContent=''; return; }
@@ -350,6 +434,7 @@ function arrayBufferToBase64(buffer) { let b=''; const bytes=new Uint8Array(buff
 function base64ToArrayBuffer(base64) { const bs=atob(base64); const bytes=new Uint8Array(bs.length); for(let i=0;i<bs.length;i++) bytes[i]=bs.charCodeAt(i); return bytes.buffer; }
 function formatFileSize(bytes) { if(bytes===0) return '0 Bytes'; const k=1024,s=['Bytes','KB','MB','GB'],i=Math.floor(Math.log(bytes)/Math.log(k)); return Math.round(bytes/Math.pow(k,i)*100)/100+' '+s[i]; }
 function downloadFile(blob,filename) { const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
+function escHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function showStatus(type,message,filename=null) {
     const icons={success:'✨',error:'🚫',processing:'⏳'};
     statusContainer.className='status-container '+type;
@@ -374,7 +459,7 @@ function renderFilesPage() {
     grid.style.display='grid'; empty.classList.remove('visible');
     files.forEach((file,i)=>{
         const card=document.createElement('div'); card.className='file-card type-'+file.type; card.style.animationDelay=i*0.06+'s';
-        card.innerHTML='<div class="file-card-icon">'+(file.type==='encrypted'?'🔒':'🔓')+'</div><div class="file-card-name">'+file.name+'</div><div class="file-card-meta"><span>'+formatFileSize(file.size)+'</span><span>'+file.date+'</span></div><span class="file-card-badge badge-'+file.type+'">'+(file.type==='encrypted'?'🔒 Encrypted':'🔓 Decrypted')+'</span>';
+        card.innerHTML='<div class="file-card-icon">'+(file.type==='encrypted'?'🔒':'🔓')+'</div><div class="file-card-name">'+escHtml(file.name)+'</div><div class="file-card-meta"><span>'+formatFileSize(file.size)+'</span><span>'+file.date+'</span></div><span class="file-card-badge badge-'+file.type+'">'+(file.type==='encrypted'?'🔒 Encrypted':'🔓 Decrypted')+'</span>';
         grid.appendChild(card);
     });
 }
@@ -384,22 +469,62 @@ document.querySelectorAll('.filter-btn').forEach(btn=>{
 document.getElementById('filesSearch').addEventListener('input',e=>{ searchQuery=e.target.value; renderFilesPage(); });
 
 // ═══════════════════════════════════════
-// ACTIVITY PAGE
+// ACTIVITY PAGE — DataTables
 // ═══════════════════════════════════════
-function renderActivityPage() {
-    const enc=appState.fileHistory.filter(f=>f.type==='encrypted').length;
-    const dec=appState.fileHistory.filter(f=>f.type==='decrypted').length;
-    const total=appState.fileHistory.length;
-    const today=appState.fileHistory.filter(f=>{ try { return new Date(f.date).toDateString()===new Date().toDateString(); } catch(e){ return false; }}).length;
-    document.getElementById('statEncrypted').textContent=enc;
-    document.getElementById('statDecrypted').textContent=dec;
-    document.getElementById('statTotal').textContent=total;
-    document.getElementById('statToday').textContent=today;
-    const log=document.getElementById('activityLog');
-    if(appState.activityLog.length===0){ log.innerHTML='<div class="activity-empty">No activity yet. Start encrypting or decrypting files!</div>'; return; }
-    log.innerHTML=appState.activityLog.map(item=>'<div class="activity-item"><div class="activity-dot '+(item.action.includes('🔒')?'dot-encrypt':'dot-decrypt')+'">'+item.action.split(' ')[0]+'</div><div class="activity-info"><div class="activity-action">'+item.action+'</div><div class="activity-filename">'+item.filename+'</div></div><div class="activity-time">'+item.time+'</div></div>').join('');
+let activityDT = null;
+
+async function renderActivityPage() {
+    const enc   = appState.fileHistory.filter(f=>f.type==='encrypted').length;
+    const dec   = appState.fileHistory.filter(f=>f.type==='decrypted').length;
+    const total = appState.fileHistory.length;
+    const today = appState.fileHistory.filter(f=>{ try { return new Date(f.date).toDateString()===new Date().toDateString(); } catch(e){ return false; }}).length;
+    document.getElementById('statEncrypted').textContent = enc;
+    document.getElementById('statDecrypted').textContent = dec;
+    document.getElementById('statTotal').textContent     = total;
+    document.getElementById('statToday').textContent     = today;
+
+    // Fetch logs from server (includes IP, browser, page)
+    const data = await api({ action: 'get_activity_logs' });
+    const logs = data.logs || [];
+
+    // Build table rows
+    const tbody = document.getElementById('activityDtBody');
+    tbody.innerHTML = logs.map(item => {
+        const dt  = new Date(item.created_at).toLocaleString();
+        const usr = escHtml(item.user_name || 'System');
+        const msg = escHtml(item.message   || '');
+        const pg  = escHtml(item.page      || '—');
+        const ip  = escHtml(item.ip_address|| '—');
+        const br  = escHtml(item.browser   || '—');
+        return '<tr><td>'+dt+'</td><td>'+usr+'</td><td>'+msg+'</td><td>'+pg+'</td><td>'+ip+'</td><td>'+br+'</td></tr>';
+    }).join('');
+
+    // Destroy existing DataTable instance before re-init
+    if ($.fn.DataTable.isDataTable('#activityDataTable')) {
+        $('#activityDataTable').DataTable().destroy();
+    }
+
+    activityDT = $('#activityDataTable').DataTable({
+        order:       [[0, 'desc']],
+        pageLength:  15,
+        lengthMenu:  [10, 15, 25, 50, 100],
+        language: {
+            emptyTable: 'No activity recorded yet.',
+            search:     'Search logs:',
+        },
+        columnDefs: [
+            { targets: [0], width: '160px' },
+            { targets: [4], width: '130px' },
+        ],
+    });
 }
-document.getElementById('clearLogBtn').addEventListener('click',()=>{ appState.activityLog=[]; renderActivityPage(); });
+
+document.getElementById('clearLogBtn').addEventListener('click', async () => {
+    if (!confirm('Clear all activity logs? This cannot be undone.')) return;
+    await api({ action: 'clear_system_logs' });
+    appState.activityLog = [];
+    renderActivityPage();
+});
 
 // ═══════════════════════════════════════
 // TEAM PAGE
@@ -424,12 +549,12 @@ async function renderTeamPage() {
         const fullName=u.first_name+' '+u.last_name;
         const isSelf=u.email===appState.currentUser.email;
         const joined=new Date(u.created_at).toLocaleDateString();
-        return '<div class="team-member-row"><div class="team-member-avatar" style="background:'+r.color+'22"><span style="color:'+r.color+';font-weight:700;font-size:0.85rem">'+initials+'</span></div><div class="team-member-info"><div class="team-member-name">'+fullName+(isSelf?' <span class="team-you-tag">you</span>':'')+'</div><div class="team-member-email">'+u.email+'</div></div><span class="team-role-pill role-pill-'+u.role+'">'+r.icon+' '+r.label+'</span><span class="team-status-pill status-'+u.status+'">'+(u.status==='active'?'● Active':'○ Suspended')+'</span><div class="team-member-joined">Joined '+joined+'</div></div>';
+        return '<div class="team-member-row"><div class="team-member-avatar" style="background:'+r.color+'22"><span style="color:'+r.color+';font-weight:700;font-size:0.85rem">'+initials+'</span></div><div class="team-member-info"><div class="team-member-name">'+escHtml(fullName)+(isSelf?' <span class="team-you-tag">you</span>':'')+'</div><div class="team-member-email">'+escHtml(u.email)+'</div></div><span class="team-role-pill role-pill-'+u.role+'">'+r.icon+' '+r.label+'</span><span class="team-status-pill status-'+u.status+'">'+(u.status==='active'?'● Active':'○ Suspended')+'</span><div class="team-member-joined">Joined '+joined+'</div></div>';
     }).join('');
 
     const teamLog=document.getElementById('teamActivityLog');
     if(appState.activityLog.length===0){ teamLog.innerHTML='<div class="activity-empty">No team activity yet.</div>'; return; }
-    teamLog.innerHTML=appState.activityLog.slice(0,20).map(item=>'<div class="activity-item"><div class="activity-dot '+(item.action.includes('🔒')?'dot-encrypt':'dot-decrypt')+'">'+item.action.split(' ')[0]+'</div><div class="activity-info"><div class="activity-action">'+item.action+' <span style="color:var(--sage);font-size:0.8rem">by '+item.user+'</span></div><div class="activity-filename">'+item.filename+'</div></div><div class="activity-time">'+item.time+'</div></div>').join('');
+    teamLog.innerHTML=appState.activityLog.slice(0,20).map(item=>'<div class="activity-item"><div class="activity-dot '+(item.action.includes('🔒')?'dot-encrypt':'dot-decrypt')+'">'+item.action.split(' ')[0]+'</div><div class="activity-info"><div class="activity-action">'+escHtml(item.action)+' <span style="color:var(--sage);font-size:0.8rem">by '+escHtml(item.user)+'</span></div><div class="activity-filename">'+escHtml(item.filename)+'</div></div><div class="activity-time">'+item.time+'</div></div>').join('');
 }
 
 // ═══════════════════════════════════════
@@ -458,7 +583,7 @@ async function renderAdminPage() {
         const initials=(u.first_name[0]+(u.last_name[0]||'')).toUpperCase();
         const fullName=u.first_name+' '+u.last_name;
         const isSelf=u.email===appState.currentUser.email;
-        return '<tr class="'+(u.status==='suspended'?'row-suspended':'')+'"><td><div class="admin-user-cell"><div class="admin-user-avatar" style="background:'+r.color+'22;color:'+r.color+'">'+initials+'</div><span>'+fullName+(isSelf?' <span class="team-you-tag">you</span>':'')+'</span></div></td><td class="admin-email-cell">'+u.email+'</td><td><select class="admin-role-select" data-uid="'+u.id+'"'+(isSelf?' disabled':'')+'><option value="user"'+(u.role==='user'?' selected':'')+'>👤 User</option><option value="manager"'+(u.role==='manager'?' selected':'')+'>👔 Manager</option><option value="admin"'+(u.role==='admin'?' selected':'')+'>🛡 Admin</option></select></td><td><span class="team-status-pill status-'+u.status+'">'+(u.status==='active'?'● Active':'○ Suspended')+'</span></td><td><div class="admin-actions">'+(isSelf?'<span style="opacity:0.35;font-size:0.8rem">—</span>':'<button class="admin-btn admin-btn-toggle" data-uid="'+u.id+'" data-name="'+fullName+'" title="'+(u.status==='active'?'Suspend':'Activate')+'">'+(u.status==='active'?'🚫':'✅')+'</button><button class="admin-btn admin-btn-delete" data-uid="'+u.id+'" data-name="'+fullName+'" title="Delete">🗑</button>')+'</div></td></tr>';
+        return '<tr class="'+(u.status==='suspended'?'row-suspended':'')+'"><td><div class="admin-user-cell"><div class="admin-user-avatar" style="background:'+r.color+'22;color:'+r.color+'">'+initials+'</div><span>'+escHtml(fullName)+(isSelf?' <span class="team-you-tag">you</span>':'')+'</span></div></td><td class="admin-email-cell">'+escHtml(u.email)+'</td><td><select class="admin-role-select" data-uid="'+u.id+'"'+(isSelf?' disabled':'')+'><option value="user"'+(u.role==='user'?' selected':'')+'>👤 User</option><option value="manager"'+(u.role==='manager'?' selected':'')+'>👔 Manager</option><option value="admin"'+(u.role==='admin'?' selected':'')+'>🛡 Admin</option></select></td><td><span class="team-status-pill status-'+u.status+'">'+(u.status==='active'?'● Active':'○ Suspended')+'</span></td><td><div class="admin-actions">'+(isSelf?'<span style="opacity:0.35;font-size:0.8rem">—</span>':'<button class="admin-btn admin-btn-toggle" data-uid="'+u.id+'" data-name="'+escHtml(fullName)+'" title="'+(u.status==='active'?'Suspend':'Activate')+'">'+(u.status==='active'?'🚫':'✅')+'</button><button class="admin-btn admin-btn-delete" data-uid="'+u.id+'" data-name="'+escHtml(fullName)+'" title="Delete">🗑</button>')+'</div></td></tr>';
     }).join('');
 
     tbody.querySelectorAll('.admin-role-select').forEach(sel=>{
@@ -495,7 +620,8 @@ async function renderAdminPage() {
     if(logs.length===0){ sysLog.innerHTML='<div class="activity-empty">No system events recorded.</div>'; return; }
     sysLog.innerHTML=logs.map(item=>{
         const t=new Date(item.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-        return '<div class="activity-item"><div class="activity-dot" style="background:rgba(123,45,138,0.1)">🖥</div><div class="activity-info"><div class="activity-action" style="color:var(--deep-green)">'+item.message+'</div></div><div class="activity-time">'+t+'</div></div>';
+        const ipBr = [item.ip_address, item.browser, item.page].filter(Boolean).join(' · ');
+        return '<div class="activity-item"><div class="activity-dot" style="background:rgba(123,45,138,0.1)">🖥</div><div class="activity-info"><div class="activity-action" style="color:var(--deep-green)">'+escHtml(item.message)+'</div>'+(ipBr?'<div class="activity-filename" style="color:var(--earth);font-size:0.78rem">'+escHtml(ipBr)+'</div>':'')+'</div><div class="activity-time">'+t+'</div></div>';
     }).join('');
 }
 
