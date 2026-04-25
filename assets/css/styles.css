@@ -361,3 +361,100 @@ nav { position: sticky; top: 0; z-index: 50; display: flex; align-items: center;
 @media (max-width: 968px) { .main-container { grid-template-columns: 1fr; } .logo-text { font-size: 2.5rem; } .card { padding: 35px 28px; } .activity-stats-row { grid-template-columns: repeat(2,1fr); } }
 @media (max-width: 768px) { nav { padding: 0 20px; } .nav-links { display: none; } .files-toolbar { flex-direction: column; align-items: stretch; } .files-search-wrap { max-width: 100%; } .settings-row { flex-direction: column; align-items: flex-start; gap: 12px; } .settings-input, .settings-select { min-width: unset; width: 100%; } .team-member-row { flex-wrap: wrap; gap: 10px; padding: 14px 20px; } .team-member-joined { display: none; } }
 @media (max-width: 520px) { .register-card { padding: 40px 24px; } .register-row { grid-template-columns: 1fr; } .activity-stats-row { grid-template-columns: repeat(2,1fr); } }
+
+/* ══════════════════════════════════════════════════════
+   LANDING PAGE  (index.php)
+   ══════════════════════════════════════════════════════ */
+.landing-hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 24px;
+    position: relative;
+    z-index: 1;
+}
+.landing-hero .landing-logo-icon { font-size: 4rem; display: block; margin-bottom: 16px; }
+.landing-hero h1   { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem,6vw,4rem); color: var(--deep-green); margin: 0 0 12px; }
+.landing-hero p    { font-size: 1.2rem; color: var(--earth); max-width: 480px; line-height: 1.6; margin: 0 auto 40px; }
+.landing-cta       { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+
+.btn-cta-primary {
+    background: var(--forest);
+    color: #fff;
+    border: none;
+    padding: 14px 36px;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+}
+.btn-cta-primary:hover { background: var(--deep-green); transform: translateY(-2px); }
+
+.btn-cta-secondary {
+    background: transparent;
+    color: var(--forest);
+    border: 2px solid var(--forest);
+    padding: 12px 32px;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+.btn-cta-secondary:hover { background: var(--forest); color: #fff; transform: translateY(-2px); }
+
+.landing-features {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 60px;
+    max-width: 860px;
+}
+.feature-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    width: 240px;
+    text-align: center;
+    backdrop-filter: blur(8px);
+}
+.feature-card-icon  { font-size: 2rem; margin-bottom: 12px; }
+.feature-card-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--deep-green); margin-bottom: 8px; }
+.feature-card-desc  { font-size: 0.9rem; color: var(--earth); line-height: 1.5; }
+
+.landing-footer {
+    position: fixed;
+    bottom: 18px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--earth);
+    opacity: 0.7;
+}
+
+/* ══════════════════════════════════════════════════════
+   ADD USER MODAL — width constraint (was inline style)
+   ══════════════════════════════════════════════════════ */
+#addUserModal .register-card { max-width: 420px; }
+
+/* ══════════════════════════════════════════════════════
+   APP PAGE — utility classes replacing inline styles
+   ══════════════════════════════════════════════════════ */
+.mb-32  { margin-bottom: 32px; }
+.mt-24  { margin-top: 24px; }
+
+/* Add-user modal role select */
+#addUserRole { width: 100%; min-width: unset; }
+
+/* Add-user modal confirm button */
+#confirmAddUserBtn { margin-top: 8px; }
