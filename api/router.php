@@ -30,6 +30,36 @@ function requireRole(string ...$roles): void {
     }
 }
 
+// ── Get real client IP ─────────────────────────────────────
+function getClientIP(): string {
+    $headers = ['HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', 'REMOTE_ADDR'];
+    foreach ($headers as $h) {
+        if (!empty($_SERVER[$h])) {
+            $ip = trim(explode(',', $_SERVER[$h])[0]);
+            if (filter_var($ip, FILTER_VALIDATE_IP)) return $ip;
+        }
+    }
+    return '0.0.0.0';
+}
+
+// ── Parse a concise browser label from UA ─────────────────
+function parseBrowser(): string {
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown';
+    if (preg_match('/(OPR|Opera)\/[\d.]+/', $ua))            return 'Opera';
+    if (preg_match('/Edg\/[\d.]+/', $ua))                     return 'Edge';
+    if (preg_match('/Chrome\/([\d.]+)/', $ua, $m))            return 'Chrome ' . explode('.', $m[1])[0];
+    if (preg_match('/Firefox\/([\d.]+)/', $ua, $m))           return 'Firefox ' . explode('.', $m[1])[0];
+    if (preg_match('/Safari\/([\d.]+)/', $ua) && !str_contains($ua, 'Chrome')) return 'Safari';
+    return substr($ua, 0, 60);
+}
+
+// ── Shared log helper (used by auth.php & the route below) ─
+function writeSystemLog(PDO $pdo, ?int $userId, string $message, string $page = ''): void {
+    $pdo->prepare(
+        'INSERT INTO system_logs (user_id, message, ip_address, browser, page) VALUES (?, ?, ?, ?, ?)'
+    )->execute([$userId, $message, getClientIP(), parseBrowser(), $page]);
+}
+
 // ── Dispatch ──────────────────────────────────────────────
 $action = trim($_POST['action'] ?? $_GET['action'] ?? '');
 
@@ -50,7 +80,9 @@ $routes = [
     'delete_user'       => 'users.php',
     // system logs
     'get_system_logs'   => 'logs.php',
+    'get_activity_logs' => 'logs.php',
     'clear_system_logs' => 'logs.php',
+    'log_page_visit'    => 'logs.php',
     // settings
     'save_settings'     => 'settings.php',
 ];
