@@ -42,7 +42,7 @@ function switchPage(page) {
         const allowed = ROLE_PAGES[user.role] || ROLE_PAGES.user;
         if (!allowed.includes(page)) { showSettingsToast('🚫 Access denied: insufficient permissions.'); return; }
         // Log page visit
-        api({ action: 'log_page_visit', page });
+        api({ action: 'log_page_visit', page, url: window.location.href + '#' + page });
     }
     document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active-page'));
     document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
@@ -70,15 +70,24 @@ document.getElementById('navBrandLink').addEventListener('click', e => { e.preve
 function applyRoleUI(role) {
     const r = ROLES[role] || ROLES.user;
     const badge = document.getElementById('navRoleBadge');
-    badge.textContent = r.badge;
-    badge.style.background  = r.color + '22';
-    badge.style.color       = r.color;
-    badge.style.borderColor = r.color + '44';
+    if (badge) {
+        badge.textContent = r.badge;
+        badge.style.background  = r.color + '22';
+        badge.style.color       = r.color;
+        badge.style.borderColor = r.color + '44';
+    }
     const drRole = document.getElementById('dropdownRole');
-    drRole.textContent = r.icon + ' ' + r.label;
-    drRole.className   = 'avatar-dropdown-role role-pill-' + role;
-    document.querySelectorAll('.nav-item-manager').forEach(el => { el.style.display = (role==='manager'||role==='admin') ? '' : 'none'; });
-    document.querySelectorAll('.nav-item-admin').forEach(el => { el.style.display = role==='admin' ? '' : 'none'; });
+    if (drRole) {
+        drRole.textContent = r.icon + ' ' + r.label;
+        drRole.className   = 'avatar-dropdown-role role-pill-' + role;
+    }
+
+    document.querySelectorAll('.nav-item-manager').forEach(el => {
+        el.style.display = (role === 'manager' || role === 'admin') ? '' : 'none';
+    });
+    document.querySelectorAll('.nav-item-admin').forEach(el => {
+        el.style.display = role === 'admin' ? '' : 'none';
+    });
 }
 
 // ═══════════════════════════════════════
@@ -146,17 +155,31 @@ function clearRegisterForm() {
 async function attemptLogin() {
     const email    = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
-    const data     = await api({ action:'login', email, password });
 
-    if (data.error) {
-        loginError.textContent   = data.error;
+    // Disable button to prevent double-clicks
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.textContent = 'Signing in...';
+
+    try {
+        const data = await api({ action: 'login', email, password });
+
+        if (data.error) {
+            loginError.textContent   = data.error;
+            loginError.style.display = 'block';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginPassword').focus();
+            return;
+        }
+        loginError.style.display = 'none';
+        loginWithUser(data.user, data.settings);
+    } catch (e) {
+        loginError.textContent   = '⚠ Server error. Check that PHP is running and the API is reachable.';
         loginError.style.display = 'block';
-        document.getElementById('loginPassword').value = '';
-        document.getElementById('loginPassword').focus();
-        return;
+    } finally {
+        btn.disabled    = false;
+        btn.textContent = 'Sign In';
     }
-    loginError.style.display = 'none';
-    loginWithUser(data.user, data.settings);
 }
 
 function loginWithUser(user, settings) {
@@ -174,11 +197,22 @@ function loginWithUser(user, settings) {
     }
 
     const initials = user.name.split(' ').map(w => w[0]).join('').toUpperCase();
-    document.getElementById('avatarInitials').textContent  = initials;
-    document.getElementById('dropdownName').textContent    = user.name;
-    document.getElementById('dropdownEmail').textContent   = user.email;
-    document.getElementById('settingName').value  = user.name;
-    document.getElementById('settingEmail').value = user.email;
+
+    const avatarEl = document.getElementById('avatarInitials');
+    if (avatarEl) avatarEl.textContent = initials;
+
+    const dropNameEl = document.getElementById('dropdownName');
+    if (dropNameEl) dropNameEl.textContent = user.name;
+
+    const dropEmailEl = document.getElementById('dropdownEmail');   
+    if (dropEmailEl) dropEmailEl.textContent = user.email;
+
+    const settingNameEl = document.getElementById('settingName');
+    if (settingNameEl) settingNameEl.value = user.name;
+
+    const settingEmailEl = document.getElementById('settingEmail');
+    if (settingEmailEl) settingEmailEl.value = user.email;
+
     applyRoleUI(user.role);
 
     loadFileHistory();
@@ -317,13 +351,13 @@ const statusContainer    = document.getElementById('statusContainer');
 const progressBar        = document.getElementById('progressBar');
 const progressFill       = document.getElementById('progressFill');
 
-encryptUpload.addEventListener('click',    () => encryptFileInput.click());
+encryptUpload.addEventListener('click', e => { if (e.target === encryptUpload || e.target.closest('.upload-area') && !e.target.closest('.file-remove-btn')) encryptFileInput.click(); });
 encryptUpload.addEventListener('dragover', e  => { e.preventDefault(); encryptUpload.classList.add('dragover'); });
 encryptUpload.addEventListener('dragleave',()  => encryptUpload.classList.remove('dragover'));
 encryptUpload.addEventListener('drop',     e  => { e.preventDefault(); encryptUpload.classList.remove('dragover'); if(e.dataTransfer.files.length>0) handleEncryptFile(e.dataTransfer.files[0]); });
 encryptFileInput.addEventListener('change',e  => { if(e.target.files.length>0) handleEncryptFile(e.target.files[0]); });
 
-decryptUpload.addEventListener('click',    () => decryptFileInput.click());
+decryptUpload.addEventListener('click', e => { if (e.target === decryptUpload || e.target.closest('.upload-area') && !e.target.closest('.file-remove-btn')) decryptFileInput.click(); });
 decryptUpload.addEventListener('dragover', e  => { e.preventDefault(); decryptUpload.classList.add('dragover'); });
 decryptUpload.addEventListener('dragleave',()  => decryptUpload.classList.remove('dragover'));
 decryptUpload.addEventListener('drop',     e  => { e.preventDefault(); decryptUpload.classList.remove('dragover'); if(e.dataTransfer.files.length>0) handleDecryptFile(e.dataTransfer.files[0]); });
@@ -519,6 +553,48 @@ async function renderActivityPage() {
     });
 }
 
+function exportActivityCSV() {
+    if (!activityDT) { showSettingsToast('⚠ No data to export.'); return; }
+
+    const headers = ['Date & Time', 'User', 'Action / Message', 'Page', 'IP Address', 'Browser'];
+    const rows    = [];
+
+    // Pull data from DataTable (respects current search/sort)
+    activityDT.rows({ search: 'applied' }).data().each(function(row) {
+        // row is a <tr> element — read its cells
+        const cells = $(row).find('td');
+        rows.push([
+            $(cells[0]).text(),
+            $(cells[1]).text(),
+            $(cells[2]).text(),
+            $(cells[3]).text(),
+            $(cells[4]).text(),
+            $(cells[5]).text(),
+        ]);
+    });
+
+    // Build from stored data directly (more reliable)
+    const body = document.getElementById('activityDtBody');
+    const trs  = body ? body.querySelectorAll('tr') : [];
+    const csvRows = [headers];
+    trs.forEach(tr => {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length) csvRows.push(Array.from(tds).map(td => '"' + td.textContent.replace(/"/g, '""') + '"'));
+    });
+
+    const csv  = csvRows.map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'encryptify_activity_' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showSettingsToast('✓ CSV exported!');
+}
+document.getElementById('exportCsvBtn').addEventListener('click', exportActivityCSV);
 document.getElementById('clearLogBtn').addEventListener('click', async () => {
     if (!confirm('Clear all activity logs? This cannot be undone.')) return;
     await api({ action: 'clear_system_logs' });
@@ -623,6 +699,109 @@ async function renderAdminPage() {
         const ipBr = [item.ip_address, item.browser, item.page].filter(Boolean).join(' · ');
         return '<div class="activity-item"><div class="activity-dot" style="background:rgba(123,45,138,0.1)">🖥</div><div class="activity-info"><div class="activity-action" style="color:var(--deep-green)">'+escHtml(item.message)+'</div>'+(ipBr?'<div class="activity-filename" style="color:var(--earth);font-size:0.78rem">'+escHtml(ipBr)+'</div>':'')+'</div><div class="activity-time">'+t+'</div></div>';
     }).join('');
+
+    renderAdminCharts(users, logs);
+}
+
+// ═══════════════════════════════════════
+// ADMIN CHARTS
+// ═══════════════════════════════════════
+let _charts = {};
+
+function destroyChart(id) {
+    if (_charts[id]) { _charts[id].destroy(); delete _charts[id]; }
+}
+
+function renderAdminCharts(users, logs) {
+    const COLORS = {
+        green:  'rgba(90,115,85,0.8)',
+        blue:   'rgba(46,109,158,0.8)',
+        purple: 'rgba(123,45,138,0.8)',
+        amber:  'rgba(212,163,115,0.8)',
+        sage:   'rgba(156,175,136,0.5)',
+    };
+
+    // ── Chart 1: Operations over last 7 days ──────────────
+    destroyChart('opsTime');
+    const last7 = Array.from({length:7}, (_,i) => {
+        const d = new Date(); d.setDate(d.getDate()-6+i);
+        return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    });
+    const encCounts = last7.map((label,i) => {
+        const d = new Date(); d.setDate(d.getDate()-6+i);
+        const ds = d.toDateString();
+        return logs.filter(l => new Date(l.created_at).toDateString()===ds && l.message.includes('ncrypt')).length;
+    });
+    const decCounts = last7.map((label,i) => {
+        const d = new Date(); d.setDate(d.getDate()-6+i);
+        const ds = d.toDateString();
+        return logs.filter(l => new Date(l.created_at).toDateString()===ds && l.message.includes('ecrypt')).length;
+    });
+    const ctx1 = document.getElementById('chartOpsOverTime');
+    if (ctx1) {
+        _charts['opsTime'] = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: last7,
+                datasets: [
+                    { label:'Encrypted', data:encCounts, borderColor:COLORS.green,  backgroundColor:'rgba(90,115,85,0.1)',  tension:0.4, fill:true, pointRadius:4 },
+                    { label:'Decrypted', data:decCounts, borderColor:COLORS.amber,   backgroundColor:'rgba(212,163,115,0.1)', tension:0.4, fill:true, pointRadius:4 },
+                ]
+            },
+            options: { responsive:true, plugins:{ legend:{ position:'bottom', labels:{ font:{ family:'DM Sans' } } } }, scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1, font:{ family:'DM Sans' } } }, x:{ ticks:{ font:{ family:'DM Sans' } } } } }
+        });
+    }
+
+    // ── Chart 2: Users by Role (Doughnut) ─────────────────
+    destroyChart('rolesChart');
+    const roleCounts = { user:0, manager:0, admin:0 };
+    users.forEach(u => { if (roleCounts[u.role] !== undefined) roleCounts[u.role]++; });
+    const ctx2 = document.getElementById('chartUsersByRole');
+    if (ctx2) {
+        _charts['rolesChart'] = new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: ['Users', 'Managers', 'Admins'],
+                datasets: [{ data: [roleCounts.user, roleCounts.manager, roleCounts.admin], backgroundColor: [COLORS.green, COLORS.blue, COLORS.purple], borderWidth:2, borderColor:'#fff' }]
+            },
+            options: { responsive:true, plugins:{ legend:{ position:'bottom', labels:{ font:{ family:'DM Sans' } } } } }
+        });
+    }
+
+    // ── Chart 3: Top Pages Visited (Bar) ──────────────────
+    destroyChart('pagesChart');
+    const pageCounts = {};
+    logs.forEach(l => { const p = l.page||'unknown'; pageCounts[p] = (pageCounts[p]||0)+1; });
+    const sortedPages = Object.entries(pageCounts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    const ctx3 = document.getElementById('chartTopPages');
+    if (ctx3) {
+        _charts['pagesChart'] = new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: sortedPages.map(p=>p[0]),
+                datasets: [{ label:'Visits', data:sortedPages.map(p=>p[1]), backgroundColor:COLORS.sage, borderColor:COLORS.green, borderWidth:1.5, borderRadius:6 }]
+            },
+            options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1, font:{ family:'DM Sans' } } }, x:{ ticks:{ font:{ family:'DM Sans' } } } } }
+        });
+    }
+
+    // ── Chart 4: Browser Distribution (Pie) ───────────────
+    destroyChart('browserChart');
+    const browserCounts = {};
+    logs.forEach(l => { const b=(l.browser||'Unknown').split(' ')[0]; browserCounts[b]=(browserCounts[b]||0)+1; });
+    const sortedBrowsers = Object.entries(browserCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const pieColors = [COLORS.green, COLORS.blue, COLORS.purple, COLORS.amber, 'rgba(156,175,136,0.8)'];
+    const ctx4 = document.getElementById('chartBrowsers');
+    if (ctx4) {
+        _charts['browserChart'] = new Chart(ctx4, {
+            type: 'pie',
+            data: {
+                labels: sortedBrowsers.map(b=>b[0]),
+                datasets: [{ data:sortedBrowsers.map(b=>b[1]), backgroundColor:pieColors, borderWidth:2, borderColor:'#fff' }]
+            },
+            options: { responsive:true, plugins:{ legend:{ position:'bottom', labels:{ font:{ family:'DM Sans' } } } } }
+        });
+    }
 }
 
 document.getElementById('clearSystemLogBtn').addEventListener('click', async ()=>{
