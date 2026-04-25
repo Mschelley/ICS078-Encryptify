@@ -77,8 +77,10 @@ switch ($action) {
         $_SESSION['user'] = $sessionUser;
 
         // Log login event
-        $pdo->prepare('INSERT INTO system_logs (user_id, message) VALUES (?, ?)')
-            ->execute([$sessionUser['id'], 'User logged in: ' . $sessionUser['name'] . ' [' . $sessionUser['role'] . ']']);
+        writeSystemLog($pdo, $sessionUser['id'],
+            'User logged in: ' . $sessionUser['name'] . ' [' . $sessionUser['role'] . ']',
+            'login'
+        );
 
         respond([
             'success'  => true,
@@ -94,8 +96,7 @@ switch ($action) {
         if (!empty($_SESSION['user'])) {
             $u = $_SESSION['user'];
             try {
-                getDB()->prepare('INSERT INTO system_logs (user_id, message) VALUES (?, ?)')
-                       ->execute([$u['id'], 'User logged out: ' . $u['name']]);
+                writeSystemLog(getDB(), $u['id'], 'User logged out: ' . $u['name'], 'logout');
             } catch (Exception $e) { /* non-fatal */ }
         }
         session_destroy();
@@ -134,8 +135,7 @@ switch ($action) {
         $newId = (int)$pdo->lastInsertId();
 
         $pdo->prepare('INSERT IGNORE INTO user_settings (user_id) VALUES (?)')->execute([$newId]);
-        $pdo->prepare('INSERT INTO system_logs (user_id, message) VALUES (?, ?)')
-            ->execute([$newId, 'New user registered: ' . $firstName . ' ' . $lastName]);
+        writeSystemLog($pdo, $newId, 'New user registered: ' . $firstName . ' ' . $lastName, 'register');
 
         respond(['success' => true, 'name' => $firstName]);
         break;
