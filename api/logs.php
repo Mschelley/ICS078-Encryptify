@@ -27,7 +27,7 @@ switch ($action) {
     // Returns own logs for regular users; all logs for manager/admin
     // ════════════════════════
     case 'get_activity_logs':
-    requireRole('admin');
+    requireRole('admin', 'manager');
 
     $stmt = getDB()->prepare(
         'SELECT sl.id, sl.message, sl.ip_address, sl.browser, sl.page, sl.created_at,
