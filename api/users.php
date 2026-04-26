@@ -7,7 +7,7 @@
 switch ($action) {
 
     // ════════════════════════
-    // LIST USERS (manager sees only 'user' role; admin sees all)
+    // LIST USERS (manager sees only 'user' and 'manager' roles; admin sees all)
     // ════════════════════════
     case 'get_users':
         $caller = requireSession();
@@ -21,7 +21,7 @@ switch ($action) {
         } elseif ($caller['role'] === 'manager') {
             $stmt = $pdo->query(
                 "SELECT id, first_name, last_name, email, role, status, created_at
-                 FROM users WHERE role = 'user' ORDER BY created_at ASC"
+                 FROM users WHERE role != 'admin' ORDER BY created_at ASC"
             );
         } else {
             respond(['error' => 'Access denied.'], 403);
