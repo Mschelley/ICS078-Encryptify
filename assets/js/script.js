@@ -81,15 +81,20 @@ function applyRoleUI(role) {
         drRole.textContent = r.icon + ' ' + r.label;
         drRole.className   = 'avatar-dropdown-role role-pill-' + role;
     }
-
-    document.querySelectorAll('.nav-item-manager').forEach(el => {
-        el.style.display = (role === 'manager' || role === 'admin') ? '' : 'none';
+    // My Files: hidden from admin
+    document.querySelectorAll('.nav-item-files').forEach(el => {
+        el.style.display = role === 'admin' ? 'none' : '';
     });
-    document.querySelectorAll('.nav-item-admin').forEach(el => {
-        el.style.display = role === 'admin' ? '' : 'none';
+    // Team: manager only
+    document.querySelectorAll('.nav-item-manager').forEach(el => {
+        el.style.display = role === 'manager' ? '' : 'none';
+    });
+    // Activity + Admin panel: admin only
+    document.querySelectorAll('.nav-item-files').forEach(el => {
+        el.style.display = (role === 'admin' || role === 'manager') ? 'none' : '';
     });
 }
-
+ 
 // ═══════════════════════════════════════
 // AUTH — demo fill
 // ═══════════════════════════════════════
@@ -278,26 +283,58 @@ async function renderDashboard() {
     if (!user) return;
     const role = user.role;
 
-    // Show/hide sections based on role
-    document.getElementById('dashUserSection').style.display    = role === 'user'    ? 'block' : 'none';
-    document.getElementById('dashManagerSection').style.display = role === 'manager' ? 'block' : 'none';
-    document.getElementById('dashAdminSection').style.display   = role === 'admin'   ? 'block' : 'none';
+    // Hide ALL sections first synchronously
+    const dashUser = document.getElementById('dashUserSection');
+    const dashMgr  = document.getElementById('dashManagerSection');
+    const dashAdm  = document.getElementById('dashAdminSection');
+
+    if (dashUser) dashUser.style.display = 'none';
+    if (dashMgr)  dashMgr.style.display  = 'none';
+    if (dashAdm)  dashAdm.style.display  = 'none';
+
+    if (role === 'user'    && dashUser) dashUser.style.display = 'block';
+    if (role === 'manager' && dashMgr)  dashMgr.style.display  = 'block';
+    if (role === 'admin'   && dashAdm)  dashAdm.style.display  = 'block';
 
     if (role === 'manager') {
-        const data = await api({ action: 'get_users' });
-        const users = data.users || [];
-        document.getElementById('dashMgrMembers').textContent   = users.length;
-        document.getElementById('dashMgrEncrypted').textContent = appState.fileHistory.filter(f=>f.type==='encrypted').length;
-        document.getElementById('dashMgrDecrypted').textContent = appState.fileHistory.filter(f=>f.type==='decrypted').length;
-        document.getElementById('dashMgrActive').textContent    = users.filter(u=>u.status==='active').length;
+    const [usersData, logsData] = await Promise.all([
+        api({ action: 'get_users' }),
+        api({ action: 'get_file_logs' }),
+    ]);
+    const users    = usersData.users || [];
+    const fileLogs = logsData.logs   || [];
 
-        const list = document.getElementById('dashMgrTeamList');
-        list.innerHTML = users.slice(0,5).map(u => {
-            const r = ROLES[u.role] || ROLES.user;
-            const initials = (u.first_name[0]+(u.last_name[0]||'')).toUpperCase();
-            return '<div class="team-member-row"><div class="team-member-avatar" style="background:'+r.color+'22"><span style="color:'+r.color+';font-weight:700;font-size:0.85rem">'+initials+'</span></div><div class="team-member-info"><div class="team-member-name">'+u.first_name+' '+u.last_name+'</div><div class="team-member-email">'+u.email+'</div></div><span class="team-role-pill role-pill-'+u.role+'">'+r.icon+' '+r.label+'</span><span class="team-status-pill status-'+u.status+'">'+(u.status==='active'?'● Active':'○ Suspended')+'</span></div>';
-        }).join('');
-    }
+    const totalEncrypted = fileLogs.filter(f => f.action === 'encrypted').length;
+    const totalDecrypted = fileLogs.filter(f => f.action === 'decrypted').length;
+    const activeUsers    = users.filter(u => u.status === 'active').length;
+
+    document.getElementById('dashMgrMembers').textContent   = users.length;
+    document.getElementById('dashMgrEncrypted').textContent = totalEncrypted;
+    document.getElementById('dashMgrDecrypted').textContent = totalDecrypted;
+    document.getElementById('dashMgrActive').textContent    = activeUsers;
+
+    // Show all users + managers (exclude admins)
+    const visible = users.filter(u => u.role !== 'admin');
+    const list = document.getElementById('dashMgrTeamList');
+    list.innerHTML = visible.map(u => {
+        const r       = ROLES[u.role] || ROLES.user;
+        const initials = (u.first_name[0] + (u.last_name[0] || '')).toUpperCase();
+        const userEnc  = fileLogs.filter(f => f.user_id == u.id && f.action === 'encrypted').length;
+        const userDec  = fileLogs.filter(f => f.user_id == u.id && f.action === 'decrypted').length;
+        return `<div class="team-member-row">
+            <div class="team-member-avatar" style="background:${r.color}22">
+                <span style="color:${r.color};font-weight:700;font-size:0.85rem">${initials}</span>
+            </div>
+            <div class="team-member-info">
+                <div class="team-member-name">${escHtml(u.first_name + ' ' + u.last_name)}</div>
+                <div class="team-member-email">${escHtml(u.email)}</div>
+            </div>
+            <span class="team-role-pill role-pill-${u.role}">${r.icon} ${r.label}</span>
+            <span style="font-size:0.8rem;color:var(--forest)">🔒 ${userEnc} &nbsp;🔓 ${userDec}</span>
+            <span class="team-status-pill status-${u.status}">${u.status === 'active' ? '● Active' : '○ Suspended'}</span>
+        </div>`;
+    }).join('') || '<div class="activity-empty">No team members found.</div>';
+}
 
     if (role === 'admin') {
         const [usersData, logsData] = await Promise.all([
@@ -306,7 +343,7 @@ async function renderDashboard() {
         ]);
         const users = usersData.users || [];
         const logs  = logsData.logs   || [];
-        const totalOps = users.reduce((s,u) => s+(parseInt(u.ops)||0), 0);
+        const totalOps = users.reduce((s,u) => s+(u.ops||0), 0);
 
         document.getElementById('dashAdmUsers').textContent    = users.length;
         document.getElementById('dashAdmAdmins').textContent   = users.filter(u=>u.role==='admin').length;
@@ -606,31 +643,48 @@ document.getElementById('clearLogBtn').addEventListener('click', async () => {
 // TEAM PAGE
 // ═══════════════════════════════════════
 async function renderTeamPage() {
-    const user=appState.currentUser;
-    if(!user||(user.role!=='manager'&&user.role!=='admin')) return;
-    document.getElementById('teamSubtitle').textContent = user.role==='admin' ? 'Admin view — all users' : 'Manager view — your team';
+    const user = appState.currentUser;
+    if (!user || (user.role !== 'manager' && user.role !== 'admin')) return;
 
-    const data = await api({ action:'get_users' });
-    if (!data.users) return;
-    const users = data.users;
+    const [usersData, logsData] = await Promise.all([
+        api({ action: 'get_users' }),
+        api({ action: 'get_file_logs' }),
+    ]);
+
+    const users    = usersData.users || [];
+    const fileLogs = logsData.logs   || [];
+
+    const totalEncrypted = fileLogs.filter(f => f.action === 'encrypted').length;
+    const totalDecrypted = fileLogs.filter(f => f.action === 'decrypted').length;
+    const activeUsers    = users.filter(u => u.status === 'active').length;
 
     document.getElementById('teamStatMembers').textContent   = users.length;
-    document.getElementById('teamStatEncrypted').textContent = appState.fileHistory.filter(f=>f.type==='encrypted').length;
-    document.getElementById('teamStatDecrypted').textContent = appState.fileHistory.filter(f=>f.type==='decrypted').length;
-    document.getElementById('teamStatActive').textContent    = users.filter(u=>u.status==='active').length;
+    document.getElementById('teamStatEncrypted').textContent = totalEncrypted;
+    document.getElementById('teamStatDecrypted').textContent = totalDecrypted;
+    document.getElementById('teamStatActive').textContent    = activeUsers;
 
-    document.getElementById('teamMembersList').innerHTML = users.map(u=>{
-        const r=ROLES[u.role]||ROLES.user;
-        const initials=(u.first_name[0]+(u.last_name[0]||'')).toUpperCase();
-        const fullName=u.first_name+' '+u.last_name;
-        const isSelf=u.email===appState.currentUser.email;
-        const joined=new Date(u.created_at).toLocaleDateString();
-        return '<div class="team-member-row"><div class="team-member-avatar" style="background:'+r.color+'22"><span style="color:'+r.color+';font-weight:700;font-size:0.85rem">'+initials+'</span></div><div class="team-member-info"><div class="team-member-name">'+escHtml(fullName)+(isSelf?' <span class="team-you-tag">you</span>':'')+'</div><div class="team-member-email">'+escHtml(u.email)+'</div></div><span class="team-role-pill role-pill-'+u.role+'">'+r.icon+' '+r.label+'</span><span class="team-status-pill status-'+u.status+'">'+(u.status==='active'?'● Active':'○ Suspended')+'</span><div class="team-member-joined">Joined '+joined+'</div></div>';
+    document.getElementById('teamMembersList').innerHTML = users.map(u => {
+        const r        = ROLES[u.role] || ROLES.user;
+        const initials = (u.first_name[0] + (u.last_name[0] || '')).toUpperCase();
+        const fullName = u.first_name + ' ' + u.last_name;
+        const isSelf   = u.email === appState.currentUser.email;
+        const joined   = new Date(u.created_at).toLocaleDateString();
+        const userEnc  = fileLogs.filter(f => f.user_id == u.id && f.action === 'encrypted').length;
+        const userDec  = fileLogs.filter(f => f.user_id == u.id && f.action === 'decrypted').length;
+        return `<div class="team-member-row">
+            <div class="team-member-avatar" style="background:${r.color}22">
+                <span style="color:${r.color};font-weight:700;font-size:0.85rem">${initials}</span>
+            </div>
+            <div class="team-member-info">
+                <div class="team-member-name">${escHtml(fullName)}${isSelf ? ' <span class="team-you-tag">you</span>' : ''}</div>
+                <div class="team-member-email">${escHtml(u.email)}</div>
+            </div>
+            <span class="team-role-pill role-pill-${u.role}">${r.icon} ${r.label}</span>
+            <span style="font-size:0.8rem;color:var(--forest)">🔒 ${userEnc} &nbsp; 🔓 ${userDec}</span>
+            <span class="team-status-pill status-${u.status}">${u.status === 'active' ? '● Active' : '○ Suspended'}</span>
+            <div class="team-member-joined">Joined ${joined}</div>
+        </div>`;
     }).join('');
-
-    const teamLog=document.getElementById('teamActivityLog');
-    if(appState.activityLog.length===0){ teamLog.innerHTML='<div class="activity-empty">No team activity yet.</div>'; return; }
-    teamLog.innerHTML=appState.activityLog.slice(0,20).map(item=>'<div class="activity-item"><div class="activity-dot '+(item.action.includes('🔒')?'dot-encrypt':'dot-decrypt')+'">'+item.action.split(' ')[0]+'</div><div class="activity-info"><div class="activity-action">'+escHtml(item.action)+' <span style="color:var(--sage);font-size:0.8rem">by '+escHtml(item.user)+'</span></div><div class="activity-filename">'+escHtml(item.filename)+'</div></div><div class="activity-time">'+item.time+'</div></div>').join('');
 }
 
 // ═══════════════════════════════════════
@@ -840,20 +894,35 @@ document.getElementById('confirmAddUserBtn').addEventListener('click', async ()=
 // SETTINGS PAGE
 // ═══════════════════════════════════════
 function loadSettingsPage() {
-    const user=appState.currentUser;
-    if(user){
-        document.getElementById('settingName').value=user.name;
-        document.getElementById('settingEmail').value=user.email;
-        const r=ROLES[user.role]||ROLES.user;
-        const badge=document.getElementById('settingsRoleBadge');
-        badge.textContent=r.icon+' '+r.label; badge.className='settings-role-badge role-pill-'+user.role;
+
+    const user = appState.currentUser;
+    const isAdmin  = user && user.role === 'admin';
+    const isMgr    = user && user.role === 'manager';
+
+    // Hide security section for admin and manager
+    const secSection = document.getElementById('settingsSecuritySection');
+    if (secSection) secSection.style.display = isAdmin ? 'block' : 'none';
+
+    // Hide role row for all users
+    const roleRow = document.getElementById('settingsRoleRow');
+    if (roleRow) roleRow.style.display = 'none';
+
+    if (user) {
+    document.getElementById('settingName').value  = user.name;
+    document.getElementById('settingEmail').value = user.email;
+    const r     = ROLES[user.role] || ROLES.user;
+    const badge = document.getElementById('settingsRoleBadge');
+    if (badge) {
+        badge.textContent = r.icon + ' ' + r.label;
+        badge.className   = 'settings-role-badge role-pill-' + user.role;
     }
-    document.getElementById('settingMinPass').value        = appState.settings.minPassLength;
-    document.getElementById('settingAutoClear').checked    = appState.settings.autoClear;
-    document.getElementById('settingPassStrength').checked = appState.settings.showStrength;
-    document.getElementById('settingTheme').value          = appState.settings.theme;
-    document.getElementById('settingReduceMotion').checked = appState.settings.reduceMotion;
-    document.getElementById('settingHistory').checked      = appState.settings.saveHistory;
+}
+document.getElementById('settingMinPass').value        = appState.settings.minPassLength;
+document.getElementById('settingAutoClear').checked    = appState.settings.autoClear;
+document.getElementById('settingPassStrength').checked = appState.settings.showStrength;
+document.getElementById('settingTheme').value          = appState.settings.theme;
+document.getElementById('settingReduceMotion').checked = appState.settings.reduceMotion;
+document.getElementById('settingHistory').checked      = appState.settings.saveHistory;
 }
 
 async function saveSettingsToDB() {
