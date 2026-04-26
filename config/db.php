@@ -11,18 +11,24 @@
 //    Local XAMPP sub-folder : 'http://localhost/encryptify'
 //    Local root             : 'http://localhost'
 //    Live domain            : 'https://encryptify.yourdomain.com'
-define('BASE_URL', 'http://localhost/encryptify');
+if (!defined('BASE_URL')) {
+    $docRoot = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'] ?? '');
+    $appRoot = str_replace('\\', '/', dirname(__DIR__));
+    $relative = $docRoot ? str_replace($docRoot, '', $appRoot) : '';
+    $relative = '/' . ltrim($relative, '/');
+    define('BASE_URL', rtrim($relative, '/'));
+}
 
 // ── Database Credentials ──────────────────────────────────
-define('DB_HOST',    'localhost');
-define('DB_NAME',    'encryptify');
-define('DB_USER',    'root');
+define('DB_HOST',    '');
+define('DB_NAME',    '');
+define('DB_USER',    '');
 define('DB_PASS',    '');
 define('DB_CHARSET', 'utf8mb4');
 
 // ── App Settings ─────────────────────────────────────────
 define('APP_NAME',   'Encryptify');
-define('APP_ENV',    'development');   // 'development' | 'production'
+define('APP_ENV',    'development');  
 
 // ══════════════════════════════════════════════════════════
 //  PDO Singleton — call getDB() anywhere after requiring this file
