@@ -85,9 +85,9 @@
         </a>
         <ul class="nav-links">
             <li><a href="#" class="active" data-page="dashboard">⊞ &nbsp;Dashboard</a></li>
-            <li><a href="#" data-page="files">📄 &nbsp;My Files</a></li>
+            <li><a href="#" data-page="files" class="nav-item-files">📄 &nbsp;My Files</a></li>
             <li><a href="#" data-page="activity" class="nav-item-admin">📊 &nbsp;Activity</a></li>
-            <li class="nav-item-manager" style="display:none"><a href="#" data-page="team">👥 &nbsp;Team</a></li>
+            <li class="nav-item-manager" style="display:none"><a href="#" data-page="team" class="nav-item-manager">👥 &nbsp;Users
             <li class="nav-item-admin"   style="display:none"><a href="#" data-page="admin">🛡 &nbsp;Admin</a></li>
             <li><a href="#" data-page="settings">⚙️ &nbsp;Settings</a></li>
         </ul>
@@ -111,8 +111,26 @@
         <div class="container">
             <header><h1 class="logo-text">Encryptify</h1><p class="tagline">PDF Protection</p></header>
 
-            <!-- ── USER DASHBOARD (all roles see encrypt/decrypt) ── -->
-            <div id="dashUserSection">
+            <!-- ── MANAGER DASHBOARD ── -->
+            <div id="dashManagerSection" style="display:none;">
+                <div class="dash-section-title">👔 Manager Overview</div>
+                <div class="activity-stats-row mb-32">
+                    <div class="stat-card"><div class="stat-icon">👤</div><div class="stat-value" id="dashMgrMembers">—</div><div class="stat-label">Users</div></div>
+                    <div class="stat-card"><div class="stat-icon">🔒</div><div class="stat-value" id="dashMgrEncrypted">—</div><div class="stat-label">Total Encrypted</div></div>
+                    <div class="stat-card"><div class="stat-icon">🔓</div><div class="stat-value" id="dashMgrDecrypted">—</div><div class="stat-label">Total Decrypted</div></div>
+                    <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value" id="dashMgrActive">—</div><div class="stat-label">Active Users</div></div>
+                </div>
+                <div class="activity-card">
+                    <div class="activity-card-header">
+                        <span class="activity-card-title">👥 &nbsp;Team Quick View</span>
+                        <a href="#" class="dash-view-all" onclick="switchPage('team');return false;">View Full Team →</a>
+                    </div>
+                    <div id="dashMgrTeamList" class="team-members-list"></div>
+                </div>
+            </div>
+
+            <!-- ── USER ONLY: encrypt/decrypt ── -->
+            <div id="dashUserSection" style="display:none;">
                 <div class="main-container">
                     <div class="card">
                         <div class="card-header"><span class="card-icon">🔒</span><h2 class="card-title">Encrypt</h2></div>
@@ -160,62 +178,54 @@
                 </div>
             </div>
 
-            <!-- ── MANAGER DASHBOARD EXTRAS ── -->
-            <div id="dashManagerSection" style="display:none;">
-                <div class="dash-section-title">👔 Manager Overview</div>
-                <div class="activity-stats-row mb-32">
-                    <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="dashMgrMembers">—</div><div class="stat-label">Team Members</div></div>
-                    <div class="stat-card"><div class="stat-icon">🔒</div><div class="stat-value" id="dashMgrEncrypted">—</div><div class="stat-label">Team Encrypted</div></div>
-                    <div class="stat-card"><div class="stat-icon">🔓</div><div class="stat-value" id="dashMgrDecrypted">—</div><div class="stat-label">Team Decrypted</div></div>
-                    <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-value" id="dashMgrActive">—</div><div class="stat-label">Active Members</div></div>
-                </div>
-                <div class="activity-card">
-                    <div class="activity-card-header"><span class="activity-card-title">👥 &nbsp;Team Quick View</span><a href="#" class="dash-view-all" onclick="switchPage('team');return false;">View Full Team →</a></div>
-                    <div id="dashMgrTeamList" class="team-members-list"></div>
-                </div>
-            </div>
-
-            <!-- ── ADMIN DASHBOARD EXTRAS ── -->
+            <!-- ── ADMIN DASHBOARD ── -->
             <div id="dashAdminSection" style="display:none;">
                 <div class="dash-section-title">🛡 Admin Overview</div>
                 <div class="activity-stats-row mb-32">
-                <div class="activity-card" style="flex:1">
-                    <div class="activity-card-header"><span class="activity-card-title">👤 &nbsp;Recent Users</span><a href="#" class="dash-view-all" onclick="switchPage('admin');return false;">Manage Users →</a></div>
-                <div id="dashAdmUserList"></div>
-             </div>
-            <div class="activity-card" style="flex:1">
-                <div class="activity-card-header"><span class="activity-card-title">🖥 &nbsp;Recent System Events</span><a href="#" class="dash-view-all" onclick="switchPage('activity');return false;">Full Log →</a></div>
-                    <div id="dashAdmRecentLog" class="activity-log"></div>
+                    <div class="stat-card"><div class="stat-icon">👤</div><div class="stat-value" id="dashAdmUsers">—</div><div class="stat-label">Total Users</div></div>
+                    <div class="stat-card"><div class="stat-icon">🛡</div><div class="stat-value" id="dashAdmAdmins">—</div><div class="stat-label">Admins</div></div>
+                    <div class="stat-card"><div class="stat-icon">👔</div><div class="stat-value" id="dashAdmManagers">—</div><div class="stat-label">Managers</div></div>
+                    <div class="stat-card"><div class="stat-icon">🔐</div><div class="stat-value" id="dashAdmOps">—</div><div class="stat-label">Total Operations</div></div>
                 </div>
-            </div>
-
-        <!-- Analytics Charts Row -->
-            <div class="dash-section-title">📊 Analytics</div>
                 <div class="activity-stats-row mb-32">
-                <div class="activity-card" style="flex:1.2">
-                    <div class="activity-card-header"><span class="activity-card-title">🔒 Operations Over Time</span></div>
-                    <canvas id="chartOpsOverTime" height="180"></canvas>
-                </div>
-                <div class="activity-card" style="flex:0.8">
-                    <div class="activity-card-header"><span class="activity-card-title">👥 Users by Role</span></div>
-                    <canvas id="chartUsersByRole" height="180"></canvas>
+                    <div class="activity-card" style="flex:1">
+                        <div class="activity-card-header">
+                            <span class="activity-card-title">👤 &nbsp;Recent Users</span>
+                            <a href="#" class="dash-view-all" onclick="switchPage('admin');return false;">Manage Users →</a>
+                        </div>
+                        <div id="dashAdmUserList"></div>
+                    </div>
+                    <div class="activity-card" style="flex:1">
+                        <div class="activity-card-header">
+                            <span class="activity-card-title">🖥 &nbsp;Recent System Events</span>
+                            <a href="#" class="dash-view-all" onclick="switchPage('activity');return false;">Full Log →</a>
+                        </div>
+                        <div id="dashAdmRecentLog" class="activity-log"></div>
                     </div>
                 </div>
-                <div class="activity-stats-row mb-32">
-                <div class="activity-card" style="flex:1">
-                    <div class="activity-card-header"><span class="activity-card-title">🌐 Top Pages Visited</span></div>
-                    <canvas id="chartTopPages" height="160"></canvas>
-                </div>
-                <div class="activity-card" style="flex:1">
-                    <div class="activity-card-header"><span class="activity-card-title">🖥 Browser Distribution</span></div>
-                    <canvas id="chartBrowsers" height="160"></canvas>
+                <div class="dash-section-title">📊 Analytics</div>
+                <div class="analytics-grid mb-32">
+                    <div class="activity-card">
+                        <div class="activity-card-header"><span class="activity-card-title">🔒 Operations Over Time</span></div>
+                        <canvas id="chartOpsOverTime"></canvas>
+                    </div>
+                    <div class="activity-card">
+                        <div class="activity-card-header"><span class="activity-card-title">👥 Users by Role</span></div>
+                        <canvas id="chartUsersByRole"></canvas>
+                    </div>
+                    <div class="activity-card">
+                        <div class="activity-card-header"><span class="activity-card-title">🌐 Top Pages Visited</span></div>
+                        <canvas id="chartTopPages"></canvas>
+                    </div>
+                    <div class="activity-card">
+                        <div class="activity-card-header"><span class="activity-card-title">🖥 Browser Distribution</span></div>
+                        <canvas id="chartBrowsers"></canvas>
+                    </div>
                 </div>
             </div>
 
-            </div>
         </div>
     </div>
-
     <!-- MY FILES -->
     <div id="page-files" class="page-view">
         <div class="container">
@@ -278,26 +288,24 @@
         </div>
     </div>
 
-    <!-- TEAM (Manager + Admin) -->
+  
+    <!-- TEAM / USER MANAGEMENT -->
     <div id="page-team" class="page-view">
         <div class="container">
-            <header><h1 class="logo-text">Team Overview</h1><p class="tagline">Monitor Team Activity</p></header>
-            <div class="activity-stats-row mb-32">
-                <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="teamStatMembers">0</div><div class="stat-label">Team Members</div></div>
-                <div class="stat-card"><div class="stat-icon">🔒</div><div class="stat-value" id="teamStatEncrypted">0</div><div class="stat-label">Total Encrypted</div></div>
-                <div class="stat-card"><div class="stat-icon">🔓</div><div class="stat-value" id="teamStatDecrypted">0</div><div class="stat-label">Total Decrypted</div></div>
-                <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-value" id="teamStatActive">0</div><div class="stat-label">Active Members</div></div>
+            <header><h1 class="logo-text">User Management</h1><p class="tagline">Manage all users</p></header>
+
+            <div class="activity-stats-row" style="margin-bottom:32px;">
+                <div class="stat-card"><div class="stat-icon">👤</div><div class="stat-value" id="teamStatMembers">—</div><div class="stat-label">Users</div></div>
+                <div class="stat-card"><div class="stat-icon">🔒</div><div class="stat-value" id="teamStatEncrypted">—</div><div class="stat-label">Total Encrypted</div></div>
+                <div class="stat-card"><div class="stat-icon">🔓</div><div class="stat-value" id="teamStatDecrypted">—</div><div class="stat-label">Total Decrypted</div></div>
+                <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value" id="teamStatActive">—</div><div class="stat-label">Active Users</div></div>
             </div>
+
             <div class="activity-card">
                 <div class="activity-card-header">
-                    <span class="activity-card-title">👥 &nbsp;Team Members</span>
-                    <span class="team-subtitle" id="teamSubtitle"></span>
+                    <span class="activity-card-title">👥 &nbsp;Users Activity Log</span>
                 </div>
                 <div id="teamMembersList" class="team-members-list"></div>
-            </div>
-            <div class="activity-card mt-24">
-                <div class="activity-card-header"><span class="activity-card-title">📋 &nbsp;Team Activity Log</span></div>
-                <div class="activity-log" id="teamActivityLog"><div class="activity-empty">No team activity yet.</div></div>
             </div>
         </div>
     </div>
@@ -343,10 +351,10 @@
                     <div class="settings-section-title">👤 Account</div>
                     <div class="settings-row"><div class="settings-label"><div class="settings-label-main">Display Name</div><div class="settings-label-sub">Shown in the navigation bar</div></div><input type="text" class="settings-input" id="settingName" placeholder="Your name"></div>
                     <div class="settings-row"><div class="settings-label"><div class="settings-label-main">Email Address</div><div class="settings-label-sub">Used for login</div></div><input type="email" class="settings-input" id="settingEmail" placeholder="you@example.com"></div>
-                    <div class="settings-row"><div class="settings-label"><div class="settings-label-main">Role</div><div class="settings-label-sub">Your current access level</div></div><span class="settings-role-badge" id="settingsRoleBadge"></span></div>
+                    <div class="settings-row" id="settingsRoleRow"><div class="settings-label"><div class="settings-label-main">Role</div><div class="settings-label-sub">Your current access level</div></div><span class="settings-role-badge" id="settingsRoleBadge"></span></div>
                     <div class="settings-row settings-row-end"><div></div><button class="btn-settings-save" id="saveAccountBtn">Save Changes</button></div>
                 </div>
-                <div class="settings-section">
+                <div class="settings-section" id="settingsSecuritySection">
                     <div class="settings-section-title">🔐 Security</div>
                     <div class="settings-row"><div class="settings-label"><div class="settings-label-main">Minimum Password Length</div><div class="settings-label-sub">For encrypting PDFs</div></div><select class="settings-select" id="settingMinPass"><option value="6">6 characters</option><option value="8">8 characters</option><option value="12">12 characters</option><option value="16">16 characters</option></select></div>
                     <div class="settings-row"><div class="settings-label"><div class="settings-label-main">Auto-clear Password Fields</div><div class="settings-label-sub">Clear after each operation</div></div><label class="toggle-switch"><input type="checkbox" id="settingAutoClear" checked><span class="toggle-track"><span class="toggle-thumb"></span></span></label></div>
